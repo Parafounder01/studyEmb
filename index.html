@@ -1,792 +1,972 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CS3691 — Embedded Systems & IoT Complete Study Guide</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        :root {
-            --primary: #080808; --canvas: #ffffff; --ink: #080808; --body: #363636;
-            --body-mid: #5a5a5a; --mute: #898989; --hairline: #d8d8d8;
-            --accent-purple: #7a3dff; --accent-pink: #ed52cb; --accent-blue: #3b89ff;
-            --accent-orange: #ff6b00; --accent-green: #00d722; --accent-yellow: #ffae13;
-            --accent-red: #ee1d36;
-            --rounded-sm: 4px; --rounded-md: 8px;
-            --space-xs: 4px; --space-sm: 8px; --space-md: 12px; --space-lg: 16px;
-            --space-xl: 20px; --space-2xl: 24px; --space-3xl: 32px;
-            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body { font-family: var(--font-sans); font-size: 16px; line-height: 1.6; color: var(--body); background: var(--canvas); overflow-x: hidden; }
-        h1,h2,h3,h4 { color: var(--ink); font-weight: 600; line-height: 1.2; }
-        .display-xxl { font-size: clamp(32px,5vw,56px); font-weight: 700; letter-spacing: -0.8px; }
-        .display-lg { font-size: clamp(24px,3.5vw,40px); font-weight: 600; }
-        .eyebrow { font-size: 13px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-purple); margin-bottom: var(--space-sm); }
-        .btn { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-md) var(--space-xl); border-radius: var(--rounded-sm); font-size: 15px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s ease; }
-        .btn-primary { background: var(--primary); color: #fff; }
-        .btn-outline { background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline); }
-        .nav-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--hairline); padding: var(--space-lg) var(--space-3xl); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-        .nav-bar .logo { font-size: 18px; font-weight: 600; color: var(--ink); text-decoration: none; }
-        .nav-bar .logo span { color: var(--accent-purple); }
-        .nav-links { display: flex; gap: var(--space-2xl); list-style: none; flex-wrap: wrap; }
-        .nav-links a { color: var(--body-mid); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
-        .nav-links a:hover, .nav-links a.active { color: var(--ink); }
-        .hero-band { padding: 120px var(--space-3xl) 60px; max-width: 1100px; margin: 0 auto; text-align: center; }
-        .hero-band h1 { margin-bottom: var(--space-lg); }
-        .hero-band p { max-width: 640px; margin: 0 auto var(--space-3xl); color: var(--body-mid); font-size: 18px; }
-        .hero-actions { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; }
-        .section { padding: var(--space-3xl); max-width: 1200px; margin: 0 auto; border-bottom: 1px solid var(--hairline); }
-        .section-header { text-align: center; margin-bottom: var(--space-3xl); }
-        .section-header h2 { margin-bottom: var(--space-sm); }
-        .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--space-2xl); }
-        .topic-card { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--rounded-md); padding: var(--space-2xl); transition: all 0.3s ease; cursor: pointer; }
-        .topic-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); transform: translateY(-2px); }
-        .topic-card .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: var(--space-sm); letter-spacing: 0.5px; }
-        .badge-purple { background: var(--accent-purple); color: #fff; }
-        .badge-pink { background: var(--accent-pink); color: #fff; }
-        .badge-blue { background: var(--accent-blue); color: #fff; }
-        .badge-orange { background: var(--accent-orange); color: #fff; }
-        .badge-green { background: var(--accent-green); color: #000; }
-        .topic-card h3 { font-size: 18px; margin-bottom: var(--space-sm); }
-        .topic-card p { font-size: 14px; color: var(--body-mid); margin-bottom: var(--space-md); }
-        .topic-card .viz-hint { display: flex; align-items: center; gap: var(--space-sm); font-size: 12px; color: var(--mute); margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--hairline); }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; opacity: 0.06; pointer-events: none; }
-        .arch-diagram { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); padding: var(--space-2xl); background: #fafafa; border-radius: var(--rounded-md); border: 1px solid var(--hairline); margin: var(--space-lg) 0; }
-        .arch-block { padding: var(--space-md) var(--space-lg); border-radius: var(--rounded-sm); font-size: 13px; font-weight: 500; text-align: center; min-width: 100px; border: 1px solid; transition: transform 0.3s ease; }
-        .arch-block:hover { transform: scale(1.05); }
-        .arch-connector { width: 2px; height: 16px; background: var(--hairline); }
-        .proto-table { width: 100%; border-collapse: collapse; margin: var(--space-lg) 0; font-size: 14px; }
-        .proto-table th { background: var(--primary); color: #fff; padding: var(--space-sm) var(--space-md); text-align: left; font-weight: 500; }
-        .proto-table td { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--hairline); }
-        .proto-table tr:hover { background: #f8f5ff; }
-        .quiz-box { background: #fafafa; border: 1px solid var(--hairline); border-radius: var(--rounded-md); padding: var(--space-2xl); margin: var(--space-lg) 0; }
-        .quiz-box h4 { margin-bottom: var(--space-md); }
-        .quiz-option { display: block; width: 100%; padding: var(--space-md) var(--space-lg); margin-bottom: var(--space-sm); text-align: left; background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--rounded-sm); cursor: pointer; font-size: 14px; transition: all 0.2s; }
-        .quiz-option:hover { border-color: var(--accent-purple); background: #f8f5ff; }
-        .quiz-option.correct { border-color: var(--accent-green); background: #e6ffe6; }
-        .quiz-option.wrong { border-color: var(--accent-red); background: #ffe6e6; }
-        .quiz-feedback { margin-top: var(--space-sm); font-size: 14px; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-sm); }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(4px); align-items: center; justify-content: center; }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: var(--canvas); border-radius: var(--rounded-md); padding: var(--space-3xl); max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 24px 48px rgba(0,0,0,0.2); }
-        .modal-content h2 { margin-bottom: var(--space-lg); }
-        .modal-close { float: right; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--body-mid); line-height: 1; }
-        @media (max-width: 768px) { .nav-links { display: none; } .topic-grid { grid-template-columns: 1fr; } .section { padding: var(--space-2xl); } }
-        @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
-        .particle-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden; }
-        .particle-bg span { position: absolute; display: block; width: 20px; height: 20px; background: var(--accent-purple); border-radius: 50%; opacity: 0.05; animation: float 20s infinite; }
-        .particle-bg span:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .particle-bg span:nth-child(2) { left: 30%; width: 40px; height: 40px; animation-delay: 3s; background: var(--accent-blue); }
-        .particle-bg span:nth-child(3) { left: 50%; animation-delay: 6s; background: var(--accent-pink); }
-        .particle-bg span:nth-child(4) { left: 70%; width: 30px; height: 30px; animation-delay: 9s; background: var(--accent-green); }
-        .particle-bg span:nth-child(5) { left: 90%; animation-delay: 12s; background: var(--accent-orange); }
-        @keyframes float { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.05; } 90% { opacity: 0.05; } 100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; } }
-        .concept-flow { display: flex; align-items: center; justify-content: center; gap: var(--space-sm); flex-wrap: wrap; margin: var(--space-lg) 0; }
-        .concept-flow .node { padding: var(--space-sm) var(--space-md); background: var(--primary); color: #fff; border-radius: var(--rounded-sm); font-size: 13px; font-weight: 500; }
-        .concept-flow .arrow { color: var(--accent-purple); font-size: 18px; }
-        .progress-bar-wrap { position: fixed; top: 60px; left: 0; width: 100%; height: 3px; z-index: 999; background: var(--hairline); }
-        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue), var(--accent-green)); width: 0%; transition: width 0.1s linear; }
-        .tip-box { background: linear-gradient(135deg, #f8f5ff, #f0f0ff); border-left: 3px solid var(--accent-purple); padding: var(--space-lg); border-radius: 0 var(--rounded-sm) var(--rounded-sm) 0; margin: var(--space-lg) 0; font-size: 14px; }
-        .tip-box strong { color: var(--accent-purple); }
-        .qa-section { margin: var(--space-2xl) 0; padding: var(--space-2xl); background: #fafafa; border-radius: var(--rounded-md); border: 1px solid var(--hairline); }
-        .qa-section h3 { font-size: 20px; margin-bottom: var(--space-lg); padding-bottom: var(--space-sm); border-bottom: 2px solid var(--accent-purple); display: flex; align-items: center; gap: var(--space-sm); }
-        .qa-item { margin-bottom: var(--space-lg); padding: var(--space-lg); background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--rounded-sm); }
-        .qa-item:hover { border-color: var(--accent-purple); box-shadow: 0 2px 12px rgba(122,61,255,0.08); }
-        .qa-q { font-weight: 600; color: var(--accent-purple); font-size: 15px; margin-bottom: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm); }
-        .qa-q .num { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; background: var(--accent-purple); color: #fff; border-radius: 50%; font-size: 12px; font-weight: 600; flex-shrink: 0; }
-        .qa-a { font-size: 14px; color: var(--body); padding-left: calc(28px + var(--space-sm)); line-height: 1.7; }
-        .qa-a ul, .qa-a ol { margin: var(--space-sm) 0; padding-left: var(--space-xl); }
-        .qa-a ul li, .qa-a ol li { margin-bottom: var(--space-xs); }
-        .qa-a strong { color: var(--ink); }
-        .one-mark-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-sm); }
-        .one-mark-item { padding: var(--space-sm) var(--space-md); background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--rounded-sm); font-size: 13px; }
-        .one-mark-item .q { font-weight: 600; color: var(--accent-purple); }
-        .one-mark-item .a { color: var(--body); margin-top: 2px; }
-        .unit-toc { display: flex; gap: var(--space-sm); justify-content: center; flex-wrap: wrap; margin: var(--space-lg) 0; }
-        .unit-toc a { padding: var(--space-sm) var(--space-lg); background: #f5f5f5; border-radius: var(--rounded-sm); text-decoration: none; color: var(--body); font-size: 13px; font-weight: 500; transition: all 0.2s; }
-        .unit-toc a:hover { background: var(--accent-purple); color: #fff; }
-        .section-toggle { display: inline-block; padding: var(--space-sm) var(--space-md); background: var(--accent-purple); color: #fff; border: none; border-radius: var(--rounded-sm); font-size: 13px; font-weight: 500; cursor: pointer; margin-bottom: var(--space-lg); transition: opacity 0.2s; }
-        .syllabus-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
-        .syllabus-card { padding: var(--space-lg); background: linear-gradient(135deg, #f8f5ff, #fff); border: 1px solid var(--hairline); border-radius: var(--rounded-md); text-align: center; }
-        .syllabus-card .unit-num { font-size: 12px; font-weight: 600; color: var(--accent-purple); text-transform: uppercase; letter-spacing: 1px; }
-        .syllabus-card h4 { font-size: 14px; margin: var(--space-sm) 0; }
-        .syllabus-card p { font-size: 12px; color: var(--body-mid); }
-        .code-block { background: #1a1a1a; color: #e0e0e0; padding: var(--space-lg); border-radius: var(--rounded-sm); font-size: 13px; overflow-x: auto; margin: var(--space-md) 0; line-height: 1.5; }
-        .code-block .comment { color: #6a9955; }
-        .code-block .keyword { color: #569cd6; }
-        .code-block .string { color: #ce9178; }
-        .code-block .num { color: #b5cea8; }
-        .timeline { position: relative; padding-left: var(--space-3xl); }
-        .timeline::before { content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--accent-purple), var(--accent-blue), var(--accent-green)); }
-        .timeline-item { position: relative; margin-bottom: var(--space-2xl); }
-        .timeline-item::before { content: ''; position: absolute; left: calc(-1 * var(--space-3xl) + 5px); top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-purple); border: 3px solid var(--canvas); }
-        .timeline-item h4 { font-size: 16px; }
-        .timeline-item p { font-size: 14px; color: var(--body-mid); }
-        .big-icon { font-size: 48px; text-align: center; margin-bottom: var(--space-md); }
-        .highlight-box { background: #fff8e1; border: 1px solid #ffe082; border-radius: var(--rounded-sm); padding: var(--space-md) var(--space-lg); margin: var(--space-lg) 0; font-size: 14px; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ET3491 — Embedded Systems & IoT Design Complete Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--primary:#080808;--canvas:#fff;--ink:#080808;--body:#363636;--body-mid:#5a5a5a;--mute:#898989;--hairline:#d8d8d8;--accent-purple:#7a3dff;--accent-pink:#ed52cb;--accent-blue:#3b89ff;--accent-orange:#ff6b00;--accent-green:#00d722;--accent-yellow:#ffae13;--accent-red:#ee1d36;--rounded-sm:4px;--rounded-md:8px;--space-xs:4px;--space-sm:8px;--space-md:12px;--space-lg:16px;--space-xl:20px;--space-2xl:24px;--space-3xl:32px;--font-sans:Inter,system-ui,-apple-system,sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);font-size:16px;line-height:1.6;color:var(--body);background:var(--canvas);overflow-x:hidden}
+h1,h2,h3,h4{color:var(--ink);font-weight:600;line-height:1.2}
+.display-xxl{font-size:clamp(32px,5vw,56px);font-weight:700;letter-spacing:-0.8px}
+.display-lg{font-size:clamp(24px,3.5vw,40px);font-weight:600}
+.eyebrow{font-size:13px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent-purple);margin-bottom:var(--space-sm)}
+.btn{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-md) var(--space-xl);border-radius:var(--rounded-sm);font-size:15px;font-weight:500;text-decoration:none;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-outline{background:var(--canvas);color:var(--ink);border:1px solid var(--hairline)}
+.nav-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--hairline);padding:var(--space-lg) var(--space-3xl);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.nav-bar .logo{font-size:18px;font-weight:600;color:var(--ink);text-decoration:none}
+.nav-bar .logo span{color:var(--accent-purple)}
+.nav-links{display:flex;gap:var(--space-2xl);list-style:none;flex-wrap:wrap}
+.nav-links a{color:var(--body-mid);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--ink)}
+.hero-band{padding:120px var(--space-3xl) 60px;max-width:1100px;margin:0 auto;text-align:center}
+.hero-band h1{margin-bottom:var(--space-lg)}
+.hero-band p{max-width:640px;margin:0 auto var(--space-3xl);color:var(--body-mid);font-size:18px}
+.hero-actions{display:flex;gap:var(--space-md);justify-content:center;flex-wrap:wrap}
+.section{padding:var(--space-3xl);max-width:1200px;margin:0 auto;border-bottom:1px solid var(--hairline)}
+.section-header{text-align:center;margin-bottom:var(--space-3xl)}
+.section-header h2{margin-bottom:var(--space-sm)}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:var(--space-2xl)}
+.topic-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--rounded-md);padding:var(--space-2xl);transition:all .3s;cursor:pointer}
+.topic-card:hover{box-shadow:0 8px 30px rgba(0,0,0,0.08);transform:translateY(-2px)}
+.topic-card .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;text-transform:uppercase;margin-bottom:var(--space-sm);letter-spacing:.5px}
+.badge-purple{background:var(--accent-purple);color:#fff}
+.badge-pink{background:var(--accent-pink);color:#fff}
+.badge-blue{background:var(--accent-blue);color:#fff}
+.badge-orange{background:var(--accent-orange);color:#fff}
+.badge-green{background:var(--accent-green);color:#000}
+.topic-card h3{font-size:18px;margin-bottom:var(--space-sm)}
+.topic-card p{font-size:14px;color:var(--body-mid);margin-bottom:var(--space-md)}
+.topic-card .viz-hint{display:flex;align-items:center;gap:var(--space-sm);font-size:12px;color:var(--mute);margin-top:var(--space-md);padding-top:var(--space-md);border-top:1px solid var(--hairline)}
+#canvas-container{position:fixed;top:0;left:0;width:100%;height:100vh;z-index:-1;opacity:.06;pointer-events:none}
+.arch-diagram{display:flex;flex-direction:column;align-items:center;gap:var(--space-sm);padding:var(--space-2xl);background:#fafafa;border-radius:var(--rounded-md);border:1px solid var(--hairline);margin:var(--space-lg) 0}
+.arch-block{padding:var(--space-md) var(--space-lg);border-radius:var(--rounded-sm);font-size:13px;font-weight:500;text-align:center;min-width:100px;border:1px solid;transition:transform .3s}
+.arch-block:hover{transform:scale(1.05)}
+.proto-table{width:100%;border-collapse:collapse;margin:var(--space-lg) 0;font-size:14px}
+.proto-table th{background:var(--primary);color:#fff;padding:var(--space-sm) var(--space-md);text-align:left;font-weight:500}
+.proto-table td{padding:var(--space-sm) var(--space-md);border-bottom:1px solid var(--hairline)}
+.proto-table tr:hover{background:#f8f5ff}
+.quiz-box{background:#fafafa;border:1px solid var(--hairline);border-radius:var(--rounded-md);padding:var(--space-2xl);margin:var(--space-lg) 0}
+.quiz-box h4{margin-bottom:var(--space-md)}
+.quiz-option{display:block;width:100%;padding:var(--space-md) var(--space-lg);margin-bottom:var(--space-sm);text-align:left;background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--rounded-sm);cursor:pointer;font-size:14px;transition:all .2s}
+.quiz-option:hover{border-color:var(--accent-purple);background:#f8f5ff}
+.quiz-option.correct{border-color:var(--accent-green);background:#e6ffe6}
+.quiz-option.wrong{border-color:var(--accent-red);background:#ffe6e6}
+.quiz-feedback{margin-top:var(--space-sm);font-size:14px;padding:var(--space-sm) var(--space-md);border-radius:var(--rounded-sm)}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;backdrop-filter:blur(4px);align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-content{background:var(--canvas);border-radius:var(--rounded-md);padding:var(--space-3xl);max-width:800px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 24px 48px rgba(0,0,0,0.2)}
+.modal-content h2{margin-bottom:var(--space-lg)}
+.modal-close{float:right;background:none;border:none;font-size:24px;cursor:pointer;color:var(--body-mid);line-height:1}
+@media(max-width:768px){.nav-links{display:none}.topic-grid{grid-template-columns:1fr}.section{padding:var(--space-2xl)}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.particle-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:hidden}
+.particle-bg span{position:absolute;display:block;width:20px;height:20px;background:var(--accent-purple);border-radius:50%;opacity:.05;animation:float 20s infinite}
+.particle-bg span:nth-child(1){left:10%;animation-delay:0s}
+.particle-bg span:nth-child(2){left:30%;width:40px;height:40px;animation-delay:3s;background:var(--accent-blue)}
+.particle-bg span:nth-child(3){left:50%;animation-delay:6s;background:var(--accent-pink)}
+.particle-bg span:nth-child(4){left:70%;width:30px;height:30px;animation-delay:9s;background:var(--accent-green)}
+.particle-bg span:nth-child(5){left:90%;animation-delay:12s;background:var(--accent-orange)}
+@keyframes float{0%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:.05}90%{opacity:.05}100%{transform:translateY(-100vh) rotate(720deg);opacity:0}}
+.concept-flow{display:flex;align-items:center;justify-content:center;gap:var(--space-sm);flex-wrap:wrap;margin:var(--space-lg) 0}
+.concept-flow .node{padding:var(--space-sm) var(--space-md);background:var(--primary);color:#fff;border-radius:var(--rounded-sm);font-size:13px;font-weight:500}
+.concept-flow .arrow{color:var(--accent-purple);font-size:18px}
+.progress-bar-wrap{position:fixed;top:60px;left:0;width:100%;height:3px;z-index:999;background:var(--hairline)}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent-purple),var(--accent-blue),var(--accent-green));width:0%;transition:width .1s linear}
+.tip-box{background:linear-gradient(135deg,#f8f5ff,#f0f0ff);border-left:3px solid var(--accent-purple);padding:var(--space-lg);border-radius:0 var(--rounded-sm) var(--rounded-sm) 0;margin:var(--space-lg) 0;font-size:14px}
+.tip-box strong{color:var(--accent-purple)}
+.qa-section{margin:var(--space-2xl) 0;padding:var(--space-2xl);background:#fafafa;border-radius:var(--rounded-md);border:1px solid var(--hairline)}
+.qa-section h3{font-size:20px;margin-bottom:var(--space-lg);padding-bottom:var(--space-sm);border-bottom:2px solid var(--accent-purple);display:flex;align-items:center;gap:var(--space-sm)}
+.qa-item{margin-bottom:var(--space-lg);padding:var(--space-lg);background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--rounded-sm)}
+.qa-item:hover{border-color:var(--accent-purple);box-shadow:0 2px 12px rgba(122,61,255,0.08)}
+.qa-q{font-weight:600;color:var(--accent-purple);font-size:15px;margin-bottom:var(--space-sm);display:flex;align-items:flex-start;gap:var(--space-sm)}
+.qa-q .num{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;background:var(--accent-purple);color:#fff;border-radius:50%;font-size:12px;font-weight:600;flex-shrink:0}
+.qa-a{font-size:14px;color:var(--body);padding-left:calc(28px + var(--space-sm));line-height:1.7}
+.qa-a ul,.qa-a ol{margin:var(--space-sm) 0;padding-left:var(--space-xl)}
+.qa-a ul li,.qa-a ol li{margin-bottom:var(--space-xs)}
+.qa-a strong{color:var(--ink)}
+.qa-a code{background:#f0f0f0;padding:2px 6px;border-radius:2px;font-size:13px}
+.one-mark-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-sm)}
+.one-mark-item{padding:var(--space-sm) var(--space-md);background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--rounded-sm);font-size:13px}
+.one-mark-item .q{font-weight:600;color:var(--accent-purple)}
+.one-mark-item .a{color:var(--body);margin-top:2px}
+.unit-toc{display:flex;gap:var(--space-sm);justify-content:center;flex-wrap:wrap;margin:var(--space-lg) 0}
+.unit-toc a{padding:var(--space-sm) var(--space-lg);background:#f5f5f5;border-radius:var(--rounded-sm);text-decoration:none;color:var(--body);font-size:13px;font-weight:500;transition:all .2s}
+.unit-toc a:hover{background:var(--accent-purple);color:#fff}
+.section-toggle{display:inline-block;padding:var(--space-sm) var(--space-md);background:var(--accent-purple);color:#fff;border:none;border-radius:var(--rounded-sm);font-size:13px;font-weight:500;cursor:pointer;margin-bottom:var(--space-lg);transition:opacity .2s}
+.syllabus-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--space-md);margin:var(--space-lg) 0}
+.syllabus-card{padding:var(--space-lg);background:linear-gradient(135deg,#f8f5ff,#fff);border:1px solid var(--hairline);border-radius:var(--rounded-md);text-align:center}
+.syllabus-card .unit-num{font-size:12px;font-weight:600;color:var(--accent-purple);text-transform:uppercase;letter-spacing:1px}
+.syllabus-card h4{font-size:14px;margin:var(--space-sm) 0}
+.syllabus-card p{font-size:12px;color:var(--body-mid)}
+.code-block{background:#1a1a1a;color:#e0e0e0;padding:var(--space-lg);border-radius:var(--rounded-sm);font-size:13px;overflow-x:auto;margin:var(--space-md) 0;line-height:1.5}
+.code-block .comment{color:#6a9955}
+.code-block .keyword{color:#569cd6}
+.code-block .string{color:#ce9178}
+.code-block .num{color:#b5cea8}
+.highlight-box{background:#fff8e1;border:1px solid #ffe082;border-radius:var(--rounded-sm);padding:var(--space-md) var(--space-lg);margin:var(--space-lg) 0;font-size:14px}
+.combo-card{display:flex;flex-wrap:wrap;gap:var(--space-md);margin:var(--space-lg) 0}
+.combo-card .part{flex:1;min-width:200px;padding:var(--space-lg);background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--rounded-sm)}
+.combo-card .part h4{font-size:14px;margin-bottom:var(--space-sm)}
+.combo-card .part p{font-size:13px;color:var(--body-mid)}
+</style>
 </head>
 <body>
 <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
 <div class="particle-bg"><span></span><span></span><span></span><span></span><span></span></div>
 <nav class="nav-bar">
-    <a href="#" class="logo">CS<span>3691</span></a>
-    <ul class="nav-links" id="navLinks">
-        <li><a href="#unit1" class="active">Unit I</a></li><li><a href="#unit2">Unit II</a></li>
-        <li><a href="#unit3">Unit III</a></li><li><a href="#unit4">Unit IV</a></li>
-        <li><a href="#unit5">Unit V</a></li><li><a href="#qa-bank">Q&A</a></li><li><a href="#quiz-section">Quiz</a></li>
-    </ul>
+<a href="#" class="logo">ET<span>3491</span></a>
+<ul class="nav-links" id="navLinks">
+<li><a href="#unit1" class="active">Unit I</a></li><li><a href="#unit2">Unit II</a></li>
+<li><a href="#unit3">Unit III</a></li><li><a href="#unit4">Unit IV</a></li>
+<li><a href="#unit5">Unit V</a></li><li><a href="#qa-bank">Q&A</a></li><li><a href="#quiz-section">Quiz</a></li>
+</ul>
 </nav>
 <section class="hero-band">
-    <div class="eyebrow">Complete Exam Preparation</div>
-    <h1 class="display-xxl">Embedded Systems & IoT</h1>
-    <p>CS3691 — Complete 5-unit study guide with detailed notes, 1-mark & 16-mark question banks, 3D visualizations, and interactive quiz. Covers all 322 pages.</p>
-    <div class="hero-actions">
-        <a href="#unit1" class="btn btn-primary">Start Reading</a>
-        <a href="#qa-bank" class="btn btn-outline">Q&A Bank</a>
-        <a href="#quiz-section" class="btn btn-outline">Quick Quiz</a>
-    </div>
-    <div class="syllabus-grid" style="margin-top:var(--space-3xl);">
-        <div class="syllabus-card"><div class="unit-num">Unit I</div><h4>8-Bit Embedded Processor</h4><p>8051 Architecture, Programming, Timers, Interrupts</p></div>
-        <div class="syllabus-card"><div class="unit-num">Unit II</div><h4>Embedded C Programming</h4><p>Memory Interfacing, RTOS, Scheduling</p></div>
-        <div class="syllabus-card"><div class="unit-num">Unit III</div><h4>IoT & Arduino</h4><p>IoT Concepts, Arduino, Sensors & Actuators</p></div>
-        <div class="syllabus-card"><div class="unit-num">Unit IV</div><h4>IoT Communication</h4><p>Protocols, Raspberry Pi, Cloud</p></div>
-        <div class="syllabus-card"><div class="unit-num">Unit V</div><h4>Applications</h4><p>Smart Home, Agriculture, Cities, Healthcare</p></div>
-    </div>
-    <div class="unit-toc"><a href="#unit1">Unit I</a><a href="#unit2">Unit II</a><a href="#unit3">Unit III</a><a href="#unit4">Unit IV</a><a href="#unit5">Unit V</a><a href="#qa-bank">Q&A</a></div>
+<div class="eyebrow">Complete Exam Preparation</div>
+<h1 class="display-xxl">Embedded Systems & IoT Design</h1>
+<p>ET3491 (Regulation 2021) &mdash; Complete 5-unit study guide with detailed notes, 1-mark &amp; 16-mark question banks, 3D visualizations, and interactive quiz. Covers all 204 pages.</p>
+<div class="hero-actions">
+<a href="#unit1" class="btn btn-primary">Start Reading</a>
+<a href="#qa-bank" class="btn btn-outline">Q&A Bank</a>
+<a href="#quiz-section" class="btn btn-outline">Quick Quiz</a>
+</div>
+<div class="syllabus-grid" style="margin-top:var(--space-3xl);">
+<div class="syllabus-card"><div class="unit-num">Unit I</div><h4>8-Bit Embedded Processor</h4><p>8051 Architecture, Timers, Interrupts, Serial</p></div>
+<div class="syllabus-card"><div class="unit-num">Unit II</div><h4>Embedded System Design</h4><p>ARM Processor, Design Process, Model Train</p></div>
+<div class="syllabus-card"><div class="unit-num">Unit III</div><h4>Processes & OS</h4><p>RTOS, Scheduling, IPC, Distributed Systems</p></div>
+<div class="syllabus-card"><div class="unit-num">Unit IV</div><h4>IoT Architecture</h4><p>M2M, NETCONF-YANG, Reference Model</p></div>
+<div class="syllabus-card"><div class="unit-num">Unit V</div><h4>IoT System Design</h4><p>Raspberry Pi, Python, Case Studies</p></div>
+</div>
+<div class="unit-toc"><a href="#unit1">Unit I</a><a href="#unit2">Unit II</a><a href="#unit3">Unit III</a><a href="#unit4">Unit IV</a><a href="#unit5">Unit V</a><a href="#qa-bank">Q&A</a></div>
 </section>
-<!-- UNIT 1 -->
+<!-- UNIT I -->
 <section class="section" id="unit1">
-    <div class="section-header">
-        <div class="eyebrow">Unit I</div>
-        <h2 class="display-lg">8-Bit Embedded Processor</h2>
-        <p>8051 Microcontroller — Architecture, Programming, Timers, Serial Port &amp; Interrupts</p>
-    </div>
-    <div class="topic-grid">
-        <div class="topic-card" onclick="openModal('modal-arch')">
-            <span class="badge badge-purple">Architecture</span>
-            <h3>8051 Microcontroller Architecture</h3>
-            <p>8-bit processor, Harvard architecture, 4KB ROM, 128B RAM, 4 I/O ports, 2x16-bit timers, serial port, interrupt controller.</p>
-            <div class="viz-hint">Click to see 3D block diagram</div>
-        </div>
-        <div class="topic-card" onclick="openModal('modal-inst')">
-            <span class="badge badge-pink">Instruction Set</span>
-            <h3>8051 Programming &amp; Instruction Set</h3>
-            <p>Assembly with MOV, ADD, JMP. 5 addressing modes: immediate, register, direct, indirect, indexed.</p>
-            <div class="viz-hint">Click for code examples</div>
-        </div>
-        <div class="topic-card" onclick="openModal('modal-timer')">
-            <span class="badge badge-blue">Timers</span>
-            <h3>Timers/Counters &amp; UART</h3>
-            <p>Two 16-bit timers (T0 &amp; T1) for delay, baud rate, counting. 4 modes. SCON, SBUF registers.</p>
-            <div class="viz-hint">Click to see timer detail</div>
-        </div>
-        <div class="topic-card" onclick="openModal('modal-int')">
-            <span class="badge badge-orange">Interrupts</span>
-            <h3>Interrupt Handling</h3>
-            <p>6 sources: Reset, INT0, Timer 0, INT1, Timer 1, Serial. IE/IP registers, vector addresses.</p>
-            <div class="viz-hint">Click for interrupt flow</div>
-        </div>
-    </div>
-
-    <div class="arch-diagram">
-        <h4 style="margin-bottom:var(--space-md);">8051 Architecture Block Diagram</h4>
-        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
-            <div class="arch-block" style="background:#7a3dff;color:#fff;border-color:#7a3dff;">CPU (ALU + CU)</div>
-            <div class="arch-block" style="background:#3b89ff;color:#fff;border-color:#3b89ff;">4KB ROM Program</div>
-            <div class="arch-block" style="background:#00d722;color:#000;border-color:#00d722;">128B RAM Data</div>
-            <div class="arch-block" style="background:#ed52cb;color:#fff;border-color:#ed52cb;">4 x 8-bit I/O Ports</div>
-            <div class="arch-block" style="background:#ff6b00;color:#fff;border-color:#ff6b00;">2 x 16-bit Timers</div>
-            <div class="arch-block" style="background:#080808;color:#fff;border-color:#080808;">Serial Port UART</div>
-            <div class="arch-block" style="background:#ffae13;color:#000;border-color:#ffae13;">Interrupt Controller</div>
-            <div class="arch-block" style="background:#ee1d36;color:#fff;border-color:#ee1d36;">16-bit Addr Bus</div>
-        </div>
-        <div class="tip-box" style="margin-bottom:0;">
-            <strong>Slow Learner Tip:</strong> 8051 is like a tiny computer on one chip. CPU = brain, ROM = permanent book (program), RAM = scratchpad (temp data), Ports = hands (I/O), Timers = alarm clocks, Interrupts = doorbells.
-        </div>
-    </div>
-
-    <button class="section-toggle" onclick="toggleSection('u1-1mark')">Toggle Unit I 1-Mark Questions</button>
-    <div class="qa-section" id="u1-1mark" style="display:none;">
-        <h3>Unit I 1-Mark Questions</h3>
-        <div class="one-mark-grid">
-            <div class="one-mark-item"><div class="q">1. What is 8051?</div><div class="a">8-bit microcontroller by Intel (1981), 40-pin DIP, Harvard architecture, 4KB ROM, 128B RAM.</div></div>
-            <div class="one-mark-item"><div class="q">2. How many I/O ports?</div><div class="a">4 ports (P0-P3), 8-bit each = 32 I/O lines.</div></div>
-            <div class="one-mark-item"><div class="q">3. ROM/RAM sizes?</div><div class="a">ROM: 4KB (0000H-0FFFH). RAM: 128 bytes (00H-7FH).</div></div>
-            <div class="one-mark-item"><div class="q">4. How many timers?</div><div class="a">2 x 16-bit timers: Timer 0 and Timer 1.</div></div>
-            <div class="one-mark-item"><div class="q">5. How many interrupts?</div><div class="a">6 sources: Reset + 5 vectored (INT0, T0, INT1, T1, Serial).</div></div>
-            <div class="one-mark-item"><div class="q">6. Name 5 addressing modes.</div><div class="a">Immediate, Register, Direct, Register Indirect, Indexed.</div></div>
-            <div class="one-mark-item"><div class="q">7. What is PSW?</div><div class="a">Program Status Word - 8-bit flag register (CY, AC, F0, RS1, RS0, OV, P).</div></div>
-            <div class="one-mark-item"><div class="q">8. DPTR size and use?</div><div class="a">16-bit Data Pointer - used to access external memory.</div></div>
-            <div class="one-mark-item"><div class="q">9. What is SBUF?</div><div class="a">Serial Buffer register - holds serial TX/RX data.</div></div>
-            <div class="one-mark-item"><div class="q">10. Function of ALE?</div><div class="a">Address Latch Enable - demultiplexes address/data on Port 0.</div></div>
-            <div class="one-mark-item"><div class="q">11. What does EA pin do?</div><div class="a">External Access - VCC=internal ROM, GND=external ROM only.</div></div>
-            <div class="one-mark-item"><div class="q">12. What is PSEN?</div><div class="a">Program Store Enable - active-low read strobe for external program memory.</div></div>
-            <div class="one-mark-item"><div class="q">13. How many register banks?</div><div class="a">4 banks (Bank 0-3), 8 registers each (R0-R7).</div></div>
-            <div class="one-mark-item"><div class="q">14. Which bits select register banks?</div><div class="a">RS1 (PSW.4) and RS0 (PSW.3).</div></div>
-            <div class="one-mark-item"><div class="q">15. 4 timer modes?</div><div class="a">Mode 0: 13-bit, Mode 1: 16-bit, Mode 2: 8-bit auto-reload, Mode 3: split.</div></div>
-            <div class="one-mark-item"><div class="q">16. Timer vs Counter?</div><div class="a">Timer counts machine cycles. Counter counts external pulses.</div></div>
-            <div class="one-mark-item"><div class="q">17. What is SCON?</div><div class="a">Serial Control register - selects mode, enables receiver, TI/RI flags.</div></div>
-            <div class="one-mark-item"><div class="q">18. Interrupt vector addresses?</div><div class="a">Reset-0000H, INT0-0003H, T0-000BH, INT1-0013H, T1-001BH, Serial-0023H.</div></div>
-            <div class="one-mark-item"><div class="q">19. What is IE register?</div><div class="a">Interrupt Enable - EA (global), ES, ET1, EX1, ET0, EX0.</div></div>
-            <div class="one-mark-item"><div class="q">20. Data/Address bus sizes?</div><div class="a">8-bit data bus, 16-bit address bus (64KB addressable).</div></div>
-        </div>
-    </div>
-
-    <button class="section-toggle" onclick="toggleSection('u1-16mark')">Toggle Unit I 16-Mark Questions</button>
-    <div class="qa-section" id="u1-16mark" style="display:none;">
-        <h3>Unit I 16-Mark Questions</h3>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">1</span> Explain 8051 architecture with block diagram. (16)</div>
-            <div class="qa-a">
-                <p><strong>CPU:</strong> 8-bit processor with ALU for arithmetic/logical ops. Can process single-bit data (bit-addressable).</p>
-                <p><strong>ROM (4KB):</strong> Program memory, address 0000H-0FFFH. External expansion up to 64KB.</p>
-                <p><strong>RAM (128B):</strong> Register banks (00H-1FH, 4x8), Bit-addressable (20H-2FH, 128 bits), Scratchpad (30H-7FH). SFRs at 80H-FFH.</p>
-                <p><strong>I/O Ports:</strong> 4 parallel ports (P0-P3), 8-bit each = 32 I/O lines. Bidirectional. P0 also for address/data.</p>
-                <p><strong>Timers:</strong> Two 16-bit timer/counters (T0, T1) for delay, counting, baud rate.</p>
-                <p><strong>Serial Port:</strong> Full-duplex UART. SBUF, SCON registers. 4 modes.</p>
-                <p><strong>Interrupts:</strong> 5 vectored sources + Reset. 2 priority levels. IE, IP, TCON registers.</p>
-                <p><strong>Buses:</strong> 8-bit data, 16-bit address. Control: PSEN, ALE, EA, RST. Harvard architecture means separate program/data memory buses for simultaneous access.</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">2</span> Explain 8051 pin diagram with all 40 pins. (16)</div>
-            <div class="qa-a">
-                <p><strong>Power:</strong> VCC (40)=+5V, GND (20)=0V.</p>
-                <p><strong>Oscillator:</strong> XTAL1 (19) input, XTAL2 (18) output. 4-30 MHz crystal.</p>
-                <p><strong>Control:</strong> RST (9) reset active-high, PSEN (29) ext ROM strobe, ALE (30) address latch, EA (31) ext access.</p>
-                <p><strong>Port 0 (32-39):</strong> Bidirectional I/O, no internal pull-ups. Multiplexed AD0-AD7.</p>
-                <p><strong>Port 1 (1-8):</strong> Bidirectional I/O with internal pull-ups.</p>
-                <p><strong>Port 2 (21-28):</strong> Bidirectional I/O. A8-A15 for external memory.</p>
-                <p><strong>Port 3 (10-17):</strong> I/O + alt functions: RXD, TXD, INT0, INT1, T0, T1, WR, RD.</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">3</span> Explain all 5 addressing modes with examples. (16)</div>
-            <div class="qa-a">
-                <p><strong>1. Immediate:</strong> <code>MOV A, #6AH</code> - Data directly in instruction. '#' prefix indicates immediate.</p>
-                <p><strong>2. Direct:</strong> <code>MOV A, 04H</code> - Address of operand given directly. No '#' prefix.</p>
-                <p><strong>3. Register Direct:</strong> <code>MOV A, R4</code> - Register name as operand. R0-R7 from current bank. 1-byte instruction.</p>
-                <p><strong>4. Register Indirect:</strong> <code>MOV A, @R0</code> - Register holds address of data. Only R0,R1. '@' indicates indirection.</p>
-                <p><strong>5. Indexed:</strong> <code>MOVC A, @A+DPTR</code> - Access program memory. Address = A + DPTR or A + PC. For lookup tables.</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">4</span> Explain 8051 timer/counter modes and serial communication. (16)</div>
-            <div class="qa-a">
-                <p><strong>TMOD Register:</strong> GATE, C/T (timer/counter), M1, M0 bits for each timer.</p>
-                <p><strong>4 Modes:</strong> Mode 0 (13-bit), Mode 1 (16-bit, most common), Mode 2 (8-bit auto-reload for baud rate), Mode 3 (split timer, T0 only).</p>
-                <p><strong>Delay Calculation:</strong> For 12MHz, machine cycle = 1us. For 1ms delay in Mode 1: Load = 65536 - 1000 = FC18H.</p>
-                <p><strong>Serial (UART):</strong> SCON selects mode. SBUF holds data. TI/RI flags. 4 modes: 0 (shift register), 1 (8-bit UART), 2 (9-bit fixed baud), 3 (9-bit variable baud). Baud rate from Timer 1.</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">5</span> Explain 8051 interrupt system with registers and priority. (16)</div>
-            <div class="qa-a">
-                <p><strong>6 Interrupt Sources:</strong> Reset (0000H), INT0 (0003H), T0 (000BH), INT1 (0013H), T1 (001BH), Serial TI/RI (0023H).</p>
-                <p><strong>IE Register:</strong> EA (global enable), ES (serial), ET1, EX1, ET0, EX0. 1 = enable.</p>
-                <p><strong>IP Register:</strong> PT1, PX1, PT0, PX0. 1 = high priority, 0 = low priority.</p>
-                <p><strong>TCON:</strong> IT0/IT1 (edge=1/level=0), IE0/IE1, TF0/TF1 flags.</p>
-                <p><strong>Process:</strong> Flag set -> Check enables -> Save PC to stack -> Jump to vector -> ISR runs -> RETI restores PC.</p>
-            </div>
-        </div>
-    </div>
+<div class="section-header">
+<div class="eyebrow">Unit I</div>
+<h2 class="display-lg">8-Bit Embedded Processor</h2>
+<p>8051 Microcontroller &mdash; Architecture, Programming, Timers, Serial Port &amp; Interrupts</p>
+</div>
+<div class="topic-grid">
+<div class="topic-card" onclick="openModal('modal-arch')">
+<span class="badge badge-purple">Architecture</span>
+<h3>8051 Microcontroller Architecture</h3>
+<p>8-bit processor, Harvard architecture, 4KB ROM, 128B RAM, 4 I/O ports, 2x16-bit timers, serial port, 6 interrupt sources.</p>
+<div class="viz-hint">Click to see 3D block diagram</div>
+</div>
+<div class="topic-card" onclick="openModal('modal-inst')">
+<span class="badge badge-pink">Instruction Set</span>
+<h3>8051 Programming &amp; Instruction Set</h3>
+<p>Assembly with MOV, ADD, JMP, CJNE, DJNZ. 5 addressing modes: immediate, register, direct, indirect, indexed.</p>
+<div class="viz-hint">Click for code examples</div>
+</div>
+<div class="topic-card" onclick="openModal('modal-timer')">
+<span class="badge badge-blue">Timers</span>
+<h3>Timers/Counters &amp; UART</h3>
+<p>Two 16-bit timers (T0 &amp; T1) for delay, baud rate, counting. 4 modes. SCON, SBUF, TMOD registers.</p>
+<div class="viz-hint">Click to see timer detail</div>
+</div>
+<div class="topic-card" onclick="openModal('modal-int')">
+<span class="badge badge-orange">Interrupts</span>
+<h3>Interrupt Handling</h3>
+<p>5 vectored sources + Reset. IE/IP registers assign priority. TCON for edge/level trigger. RETI restores context.</p>
+<div class="viz-hint">Click for interrupt flow</div>
+</div>
+</div>
+<div class="arch-diagram">
+<h4 style="margin-bottom:var(--space-md);">8051 Architecture Block Diagram</h4>
+<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+<div class="arch-block" style="background:#7a3dff;color:#fff;border-color:#7a3dff;">CPU (ALU + CU)</div>
+<div class="arch-block" style="background:#3b89ff;color:#fff;border-color:#3b89ff;">4KB ROM Program</div>
+<div class="arch-block" style="background:#00d722;color:#000;border-color:#00d722;">128B RAM Data</div>
+<div class="arch-block" style="background:#ed52cb;color:#fff;border-color:#ed52cb;">4 x 8-bit I/O Ports</div>
+<div class="arch-block" style="background:#ff6b00;color:#fff;border-color:#ff6b00;">2 x 16-bit Timers</div>
+<div class="arch-block" style="background:#080808;color:#fff;border-color:#080808;">Serial Port UART</div>
+<div class="arch-block" style="background:#ffae13;color:#000;border-color:#ffae13;">Interrupt Controller</div>
+<div class="arch-block" style="background:#ee1d36;color:#fff;border-color:#ee1d36;">16-bit Addr Bus</div>
+</div>
+<div class="tip-box" style="margin-bottom:0;">
+<strong>Slow Learner Tip:</strong> 8051 is like a tiny computer on one chip. CPU = brain, ROM = permanent book (program), RAM = scratchpad (temp data), Ports = hands (I/O), Timers = alarm clocks, Interrupts = doorbells.
+</div>
+</div>
+<div class="combo-card">
+<div class="part"><h4>Pin Groups</h4><p><strong>VCC(40), GND(20)</strong> &mdash; Power<br/><strong>XTAL1(19), XTAL2(18)</strong> &mdash; Crystal<br/><strong>RST(9)</strong> &mdash; Active-high reset<br/><strong>PSEN(29)</strong> &mdash; Ext ROM strobe<br/><strong>ALE(30)</strong> &mdash; Address latch<br/><strong>EA(31)</strong> &mdash; External access</p></div>
+<div class="part"><h4>I/O Ports</h4><p><strong>P0(32-39)</strong> &mdash; AD0-AD7 mux<br/><strong>P1(1-8)</strong> &mdash; General I/O<br/><strong>P2(21-28)</strong> &mdash; A8-A15 addr<br/><strong>P3(10-17)</strong> &mdash; RXD, TXD, INT0, INT1, T0, T1, WR, RD</p></div>
+<div class="part"><h4>Internal RAM</h4><p><strong>00H-1FH</strong> &mdash; 4 Register Banks<br/><strong>20H-2FH</strong> &mdash; Bit-addressable (128 bits)<br/><strong>30H-7FH</strong> &mdash; Scratchpad<br/><strong>80H-FFH</strong> &mdash; SFRs</p></div>
+</div>
+<div class="highlight-box">
+<strong>Unit I Syllabus:</strong> Microcontrollers for an Embedded System &mdash; 8051 Architecture &mdash; Addressing Modes &mdash; Instruction Set &mdash; Program &amp; Data Memory &mdash; Stacks &mdash; Interrupts &mdash; Timers/Counters &mdash; Serial Ports &mdash; Programming.
+</div>
+<button class="section-toggle" onclick="toggleSection('u1-1mark')">Toggle Unit I 1-Mark Questions</button>
+<div class="qa-section" id="u1-1mark" style="display:none;">
+<h3>Unit I 1-Mark Questions (20)</h3>
+<div class="one-mark-grid">
+<div class="one-mark-item"><div class="q">1. What is 8051?</div><div class="a">8-bit microcontroller by Intel (1981), 40-pin DIP, Harvard architecture, 4KB ROM, 128B RAM.</div></div>
+<div class="one-mark-item"><div class="q">2. How many I/O ports?</div><div class="a">4 ports (P0-P3), 8-bit each = 32 I/O lines.</div></div>
+<div class="one-mark-item"><div class="q">3. ROM/RAM sizes?</div><div class="a">ROM: 4KB (0000H-0FFFH). RAM: 128 bytes (00H-7FH).</div></div>
+<div class="one-mark-item"><div class="q">4. How many timers?</div><div class="a">2 x 16-bit timers: Timer 0 and Timer 1.</div></div>
+<div class="one-mark-item"><div class="q">5. How many interrupt sources?</div><div class="a">5 vectored (INT0, T0, INT1, T1, Serial) + Reset = 6 total.</div></div>
+<div class="one-mark-item"><div class="q">6. Name 5 addressing modes.</div><div class="a">Immediate, Register, Direct, Register Indirect, Indexed.</div></div>
+<div class="one-mark-item"><div class="q">7. What is PSW?</div><div class="a">Program Status Word - 8-bit flag register (CY, AC, F0, RS1, RS0, OV, P).</div></div>
+<div class="one-mark-item"><div class="q">8. DPTR size and use?</div><div class="a">16-bit Data Pointer &mdash; used to access external memory (MOVX, MOVC).</div></div>
+<div class="one-mark-item"><div class="q">9. What is SBUF?</div><div class="a">Serial Buffer register &mdash; holds TX/RX data for serial port.</div></div>
+<div class="one-mark-item"><div class="q">10. Function of ALE?</div><div class="a">Address Latch Enable &mdash; demultiplexes address/data on Port 0.</div></div>
+<div class="one-mark-item"><div class="q">11. What does EA pin do?</div><div class="a">External Access &mdash; VCC=internal+external ROM, GND=external only.</div></div>
+<div class="one-mark-item"><div class="q">12. What is PSEN?</div><div class="a">Program Store Enable &mdash; active-low read strobe for external program memory.</div></div>
+<div class="one-mark-item"><div class="q">13. How many register banks?</div><div class="a">4 banks (Bank 0-3), 8 registers each (R0-R7).</div></div>
+<div class="one-mark-item"><div class="q">14. Which bits select register banks?</div><div class="a">RS1 (PSW.4) and RS0 (PSW.3). 00=Bank0, 01=Bank1, 10=Bank2, 11=Bank3.</div></div>
+<div class="one-mark-item"><div class="q">15. 4 timer modes?</div><div class="a">Mode0: 13-bit, Mode1: 16-bit, Mode2: 8-bit auto-reload, Mode3: split timer.</div></div>
+<div class="one-mark-item"><div class="q">16. Timer vs Counter?</div><div class="a">Timer counts machine cycles (internal). Counter counts external pulses on T0/T1 pins.</div></div>
+<div class="one-mark-item"><div class="q">17. What is SCON?</div><div class="a">Serial Control register &mdash; selects mode, enables receiver, TI/RI flags.</div></div>
+<div class="one-mark-item"><div class="q">18. Interrupt vector addresses?</div><div class="a">Reset-0000H, INT0-0003H, T0-000BH, INT1-0013H, T1-001BH, Serial-0023H.</div></div>
+<div class="one-mark-item"><div class="q">19. What is IE register?</div><div class="a">Interrupt Enable &mdash; EA (global), ES, ET1, EX1, ET0, EX0 bits.</div></div>
+<div class="one-mark-item"><div class="q">20. What is the initial SP value?</div><div class="a">SP = 07H after reset. Stack grows upward from 08H in internal RAM.</div></div>
+</div>
+</div>
+<button class="section-toggle" onclick="toggleSection('u1-16mark')">Toggle Unit I 16-Mark Questions</button>
+<div class="qa-section" id="u1-16mark" style="display:none;">
+<h3>Unit I 16-Mark Questions</h3>
+<div class="qa-item">
+<div class="qa-q"><span class="num">1</span> Explain 8051 architecture with block diagram. (16)</div>
+<div class="qa-a">
+<p><strong>CPU:</strong> 8-bit processor with ALU for arithmetic/logic ops. Can process single-bit data (bit-addressable).</p>
+<p><strong>ROM (4KB):</strong> Program memory, address 0000H-0FFFH. External expansion up to 64KB via P0/P2.</p>
+<p><strong>RAM (128B):</strong> Register banks (00H-1FH, 4x8=32B), Bit-addressable (20H-2FH, 128 bits), Scratchpad (30H-7FH). SFRs at 80H-FFH.</p>
+<p><strong>I/O Ports:</strong> 4 parallel ports (P0-P3), 8-bit each = 32 I/O lines. Bidirectional. P0 also for AD0-AD7. P2 for A8-A15. P3 has alternate functions.</p>
+<p><strong>Timers:</strong> Two 16-bit timer/counters (T0, T1). TMOD config. TCON flags. 4 modes.</p>
+<p><strong>Serial Port:</strong> Full-duplex UART. SBUF, SCON registers. 4 modes. Baud from Timer 1.</p>
+<p><strong>Interrupts:</strong> 5 vectored + Reset. IE/IP registers. 2 priority levels.</p>
+<p><strong>Buses:</strong> 8-bit data, 16-bit address. Control: PSEN, ALE, EA, RST. Harvard architecture with separate buses for program/data.</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">2</span> Explain 8051 pin diagram with all 40 pins. (16)</div>
+<div class="qa-a">
+<p><strong>Power:</strong> VCC (40)=+5V, GND (20)=0V.</p>
+<p><strong>Oscillator:</strong> XTAL1 (19)=osc input, XTAL2 (18)=osc output. 4-30 MHz crystal.</p>
+<p><strong>Control:</strong> RST (9)=reset active-high, PSEN (29)=ext program strobe, ALE (30)=address latch enable, EA (31)=external access.</p>
+<p><strong>Port 0 (32-39):</strong> Bidirectional I/O, no internal pull-ups (open-drain). Multiplexed AD0-AD7 for external memory.</p>
+<p><strong>Port 1 (1-8):</strong> Bidirectional I/O with internal pull-ups.</p>
+<p><strong>Port 2 (21-28):</strong> Bidirectional I/O. Provides A8-A15 for external memory addressing.</p>
+<p><strong>Port 3 (10-17):</strong> I/O + alternate functions: RXD(10), TXD(11), INT0(12), INT1(13), T0(14), T1(15), WR(16), RD(17).</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">3</span> Explain all 5 addressing modes with examples. (16)</div>
+<div class="qa-a">
+<p><strong>1. Immediate:</strong> <code>MOV A, #6AH</code> &mdash; Data directly in instruction. 2-byte instruction.</p>
+<p><strong>2. Direct:</strong> <code>MOV A, 04H</code> &mdash; Address of operand given directly. No '#'. 2-3 bytes. Accesses RAM 00H-7FH and SFRs 80H-FFH.</p>
+<p><strong>3. Register Direct:</strong> <code>MOV A, R4</code> &mdash; Register name as operand. R0-R7 from current bank. 1-byte instruction.</p>
+<p><strong>4. Register Indirect:</strong> <code>MOV A, @R0</code> &mdash; Register holds address of data. Only R0,R1 allowed. 1-byte.</p>
+<p><strong>5. Indexed:</strong> <code>MOVC A, @A+DPTR</code> &mdash; Access program memory for lookup tables. Read-only.</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">4</span> Explain 8051 timer/counter modes and serial communication. (16)</div>
+<div class="qa-a">
+<p><strong>TMOD Register:</strong> GATE, C/T (timer/counter select), M1, M0 bits for each timer.</p>
+<p><strong>4 Modes:</strong> Mode 0 (13-bit, max 8192), Mode 1 (16-bit, most common, max 65536), Mode 2 (8-bit auto-reload, used for baud rate), Mode 3 (split timer, T0 only).</p>
+<p><strong>Delay Calculation:</strong> For 12MHz, machine cycle = 1us. For 1ms in Mode 1: Load = 65536 - 1000 = FC18H.</p>
+<p><strong>Serial (UART):</strong> SCON selects mode. SBUF holds data. TI/RI flags. Baud = (2<sup>SMOD</sup>/32) x (Fosc/(12x(256-TH1))).</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">5</span> Explain 8051 interrupt system with registers and priority. (16)</div>
+<div class="qa-a">
+<p><strong>6 Interrupt Sources:</strong> Reset (0000H, highest), INT0 (0003H), T0 (000BH), INT1 (0013H), T1 (001BH), Serial TI/RI (0023H).</p>
+<p><strong>IE Register (A8H):</strong> EA (7)=global, ES(4)=serial, ET1(3)=T1, EX1(2)=INT1, ET0(1)=T0, EX0(0)=INT0.</p>
+<p><strong>IP Register (B8H):</strong> PT1(3), PX1(2), PT0(1), PX0(0). 1=high priority, 0=low priority.</p>
+<p><strong>TCON (88H):</strong> IT0/IT1 (edge=1/level=0 trigger), IE0/IE1 (pending flags), TF0/TF1 (timer overflow flags).</p>
+<p><strong>Process:</strong> Flag set &rarr; Check IE enable bits &rarr; Save PC to stack &rarr; Jump to vector address &rarr; ISR runs &rarr; RETI restores PC from stack.</p>
+</div>
+</div>
+</div>
 </section>
-
-<!-- UNIT 2 -->
+<!-- UNIT II -->
 <section class="section" id="unit2">
-    <div class="section-header">
-        <div class="eyebrow">Unit II</div>
-        <h2 class="display-lg">Embedded C Programming</h2>
-        <p>Memory Interfacing - Embedded C - RTOS - Context Switching - Scheduling</p>
-    </div>
-    <div class="qa-section">
-        <h3>Unit II Key Points</h3>
-        <div class="one-mark-grid">
-            <div class="one-mark-item"><div class="q">Microprocessor vs Microcontroller</div><div class="a">Micro = CPU only. Microcontroller = CPU + memory + I/O on single chip.</div></div>
-            <div class="one-mark-item"><div class="q">What is RTOS?</div><div class="a">Real-Time OS for deterministic task scheduling with timing guarantees.</div></div>
-            <div class="one-mark-item"><div class="q">Types of RTOS</div><div class="a">Hard (strict), Soft (relaxed), Firm (quality impact).</div></div>
-            <div class="one-mark-item"><div class="q">Context Switching</div><div class="a">Save current task state, restore another to resume execution.</div></div>
-            <div class="one-mark-item"><div class="q">What is PCB?</div><div class="a">Process Control Block - stores PC, registers, stack pointer, memory info.</div></div>
-            <div class="one-mark-item"><div class="q">Preemptive vs Non-Preemptive</div><div class="a">Preemptive: can interrupt. Non-Preemptive: runs to completion.</div></div>
-            <div class="one-mark-item"><div class="q">'volatile' keyword</div><div class="a">Prevents compiler optimization - variable changes by hardware.</div></div>
-            <div class="one-mark-item"><div class="q">'sbit' keyword</div><div class="a">Declares single bit in SFR. Example: sbit LED = P1^0;</div></div>
-            <div class="one-mark-item"><div class="q">GPOS vs RTOS</div><div class="a">GPOS: fairness, avg bandwidth, non-deterministic. RTOS: guaranteed response, strict timing.</div></div>
-            <div class="one-mark-item"><div class="q">What is a semaphore?</div><div class="a">Synchronization primitive for shared resource access control.</div></div>
-            <div class="one-mark-item"><div class="q">Priority Inversion</div><div class="a">Lower priority task holds resource needed by higher priority task.</div></div>
-            <div class="one-mark-item"><div class="q">Round Robin</div><div class="a">Each task gets fixed time slice in circular order.</div></div>
-        </div>
-    </div>
-    <button class="section-toggle" onclick="toggleSection('u2-16mark')">Toggle Unit II 16-Mark Questions</button>
-    <div class="qa-section" id="u2-16mark" style="display:none;">
-        <h3>Unit II 16-Mark Questions</h3>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">1</span> Explain external memory interfacing in 8051. (16)</div>
-            <div class="qa-a">
-                <p><strong>Program Memory:</strong> P0 multiplexes A0-A7/D0-D7 with ALE latching address in 74HC373. P2 provides A8-A15. PSEN enables external ROM. EA=VCC for internal+external. Max 64KB.</p>
-                <p><strong>Data Memory:</strong> Same address/data. RD (P3.7) and WR (P3.6) control RAM. MOVX instruction accesses external RAM. Max 64KB.</p>
-                <p><strong>Internal Memory:</strong> RAM: Register Banks (00H-1FH), Bit-addressable (20H-2FH), Scratchpad (30H-7FH). SFRs (80H-FFH) for control registers.</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">2</span> Explain Embedded C concepts with code examples. (16)</div>
-            <div class="qa-a">
-                <p><strong>sfr:</strong> Declares SFR at specific address. <code>sfr P0 = 0x80;</code></p>
-                <p><strong>sbit:</strong> Declares single bit of SFR. <code>sbit LED = P1^0;</code></p>
-                <p><strong>volatile:</strong> Prevents optimization for hardware-changing variables.</p>
-                <p><strong>Bit manipulation:</strong> SET_BIT(reg,bit) = (reg |= (1<<bit)), CLR_BIT(reg,bit) = (reg &= ~(1<<bit)).</p>
-                <p><strong>Example - LED Blink:</strong> <code>#include &lt;reg51.h&gt; sbit LED = P1^0; void delay(unsigned int ms) { ... } void main() { while(1) { LED = 0; delay(1000); LED = 1; delay(1000); } }</code></p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">3</span> Explain RTOS - need, types, components, scheduling. (16)</div>
-            <div class="qa-a">
-                <p><strong>Need:</strong> Multiple tasks with timing requirements, deterministic response, modular development, efficient resource management.</p>
-                <p><strong>Types:</strong> Hard RTOS (airbag, flight control), Soft RTOS (multimedia), Firm RTOS (quality impact but not fatal).</p>
-                <p><strong>Components:</strong> Scheduler, Task Manager, Inter-task Communication (queues, semaphores, mutexes), Memory Manager, Timer/ISR handlers.</p>
-                <p><strong>Scheduling:</strong> Preemptive (interrupt driven), Non-Preemptive (cooperative), Rate Monotonic (fixed priority by period), EDF (dynamic by deadline), Round Robin.</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">4</span> Explain context switching and priority scheduling. (16)</div>
-            <div class="qa-a">
-                <p><strong>Context Switching:</strong> Saving/restoring task state (PC, registers, SP, memory info) in PCB. Triggered by interrupts, timer ticks, system calls.</p>
-                <p><strong>Flow:</strong> Task A Running -> Interrupt -> Save A's PCB -> Scheduler selects B -> Restore B's PCB -> Task B Running.</p>
-                <p><strong>Preemptive:</strong> Higher priority interrupts lower. Common in RTOS. Emergency brake interrupts cruise control.</p>
-                <p><strong>Non-Preemptive:</strong> Task runs until it yields. Simple but starvation risk.</p>
-                <p><strong>RM:</strong> Shorter period = higher priority. <strong>EDF:</strong> Nearest deadline = highest priority (up to 100% utilization).</p>
-            </div>
-        </div>
-    </div>
+<div class="section-header">
+<div class="eyebrow">Unit II</div>
+<h2 class="display-lg">Embedded System Design & ARM Processor</h2>
+<p>Embedded System Design Process &mdash; Model Train Controller &mdash; ARM Processor Architecture &amp; Programming</p>
+</div>
+<div class="topic-grid">
+<div class="topic-card">
+<span class="badge badge-purple">Design Process</span>
+<h3>Embedded System Design Process</h3>
+<p>Requirements &rarr; Specification &rarr; Architecture &rarr; Component Design &rarr; System Integration &rarr; Testing. Non-functional requirements: cost, power, performance, size.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-blue">Model Train</span>
+<h3>Model Train Controller</h3>
+<p>Classic embedded design example. 8 trains, speed control, track status. Messages via UART track. State machine for commands, error handling with CRC.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-orange">ARM</span>
+<h3>ARM Processor Architecture</h3>
+<p>RISC family. ARM7TDMI: 32-bit, 3-stage pipeline, Thumb (16-bit) support, 7 modes. Register bank with 37 registers (30 general + 7 status).</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-pink">ARM ISA</span>
+<h3>ARM Instruction Set</h3>
+<p>Load/store (LDR/STR), data processing (ADD,SUB,MUL), branch (B,BL), multiply (MUL,MLA). Conditional execution for all instructions. Barrel shifter.</p>
+</div>
+</div>
+<div class="arch-diagram">
+<h4 style="margin-bottom:var(--space-md);">Embedded System Design Flow</h4>
+<div class="concept-flow">
+<span class="node" style="background:#7a3dff;">Requirements</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#3b89ff;">Specification</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#00d722;">Architecture</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#ff6b00;">Components</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#ed52cb;">Integration</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#080808;">Testing</span>
+</div>
+<div class="tip-box" style="margin-bottom:0;">
+<strong>Design Methodology:</strong> 1) Scorecard tracking, 2) Bug catching early, 3) Team coordination. Non-functional: cost (Mfg + R&amp;D), performance (WCET analysis), power (battery vs wall), size (PCB area).
+</div>
+</div>
+<div class="combo-card">
+<div class="part"><h4>Model Train Controller</h4><p><strong>Purpose:</strong> Control speed of up to 8 model trains<br/><strong>Inputs:</strong> Speed/ direction buttons<br/><strong>Outputs:</strong> Track voltage (PWM)<br/><strong>Protocol:</strong> UART over track<br/><strong>CRC:</strong> Error detection for reliable comm</p></div>
+<div class="part"><h4>ARM7TDMI Features</h4><p><strong>T:</strong> Thumb 16-bit instruction set<br/><strong>D:</strong> Debug support<br/><strong>M:</strong> Enhanced multiplier (64-bit result)<br/><strong>I:</strong> EmbeddedICE hardware debug<br/><strong>3-stage pipeline:</strong> Fetch-Decode-Execute</p></div>
+<div class="part"><h4>ARM Modes (7)</h4><p>User (non-privileged), FIQ, IRQ, Supervisor (SWI), Abort (data/prefetch), Undefined, System. Mode bits in CPSR[4:0].</p></div>
+</div>
+<div class="highlight-box">
+<strong>Unit II Syllabus:</strong> Embedded System Design Process &mdash; Model Train Controller &mdash; ARM Processor &mdash; Instruction Set Preliminaries &mdash; CPU &mdash; Programming Input &amp; Output &mdash; Supervisor Mode &mdash; Exceptions &amp; Traps &mdash; Assembly, Linking &amp; Loading &mdash; Program-Level Performance Analysis.
+</div>
+<button class="section-toggle" onclick="toggleSection('u2-1mark')">Toggle Unit II 1-Mark Questions</button>
+<div class="qa-section" id="u2-1mark" style="display:none;">
+<h3>Unit II 1-Mark Questions (20)</h3>
+<div class="one-mark-grid">
+<div class="one-mark-item"><div class="q">1. What are 3 reasons for a design methodology?</div><div class="a">Scorecard tracking, early bug detection, team coordination.</div></div>
+<div class="one-mark-item"><div class="q">2. Major non-functional requirements?</div><div class="a">Cost, power, performance, size, time-to-market.</div></div>
+<div class="one-mark-item"><div class="q">3. What is WCET?</div><div class="a">Worst-Case Execution Time &mdash; maximum time a task can take.</div></div>
+<div class="one-mark-item"><div class="q">4. What is a conceptual specification?</div><div class="a">User-facing description of purpose, inputs, outputs, functions.</div></div>
+<div class="one-mark-item"><div class="q">5. Two parts of cost?</div><div class="a">Manufacturing cost (per unit) + R&amp;D cost (one-time).</div></div>
+<div class="one-mark-item"><div class="q">6. What does the Model Train Controller do?</div><div class="a">Controls speed/direction of up to 8 model trains via track UART.</div></div>
+<div class="one-mark-item"><div class="q">7. ARM stands for?</div><div class="a">Advanced RISC Machine &mdash; RISC architecture family.</div></div>
+<div class="one-mark-item"><div class="q">8. ARM7TDMI pipeline stages?</div><div class="a">Fetch, Decode, Execute &mdash; 3-stage pipeline.</div></div>
+<div class="one-mark-item"><div class="q">9. What does T in ARM7TDMI mean?</div><div class="a">Thumb &mdash; 16-bit compressed instruction set.</div></div>
+<div class="one-mark-item"><div class="q">10. ARM has how many registers?</div><div class="a">37 registers total: 30 general-purpose + 7 status registers.</div></div>
+<div class="one-mark-item"><div class="q">11. What is CPSR?</div><div class="a">Current Program Status Register &mdash; holds condition flags (NZCV) + mode bits + IRQ/FIQ disable.</div></div>
+<div class="one-mark-item"><div class="q">12. How many ARM processor modes?</div><div class="a">7 modes: User, FIQ, IRQ, Supervisor, Abort, Undefined, System.</div></div>
+<div class="one-mark-item"><div class="q">13. What is SPSR?</div><div class="a">Saved Program Status Register &mdash; saves CPSR when exception occurs.</div></div>
+<div class="one-mark-item"><div class="q">14. Which instruction enters Supervisor mode?</div><div class="a">SWI (Software Interrupt) with 24-bit immediate argument.</div></div>
+<div class="one-mark-item"><div class="q">15. ARM addressing: base-plus-offset?</div><div class="a">Register value + offset forms address. Eg: LDR R0, [R1, #4]</div></div>
+<div class="one-mark-item"><div class="q">16. Compare CMP instruction?</div><div class="a">CMP R0,R1 computes R0-R1, sets status bits, discards result.</div></div>
+<div class="one-mark-item"><div class="q">17. What is LDR/STR?</div><div class="a">LDR=Load Register (memory to reg). STR=Store Register (reg to memory). ARM is load-store architecture.</div></div>
+<div class="one-mark-item"><div class="q">18. LDMIA means?</div><div class="a">Load Multiple, Increment After &mdash; loads multiple registers in one instruction.</div></div>
+<div class="one-mark-item"><div class="q">19. What does BL instruction do?</div><div class="a">Branch with Link &mdash; calls subroutine, saves return address in LR (R14).</div></div>
+<div class="one-mark-item"><div class="q">20. What is the barrel shifter?</div><div class="a">Part of ARM datapath that shifts/rotates second operand before ALU operation &mdash; at no extra cycle cost.</div></div>
+</div>
+</div>
+<button class="section-toggle" onclick="toggleSection('u2-16mark')">Toggle Unit II 16-Mark Questions</button>
+<div class="qa-section" id="u2-16mark" style="display:none;">
+<h3>Unit II 16-Mark Questions</h3>
+<div class="qa-item">
+<div class="qa-q"><span class="num">1</span> Explain the embedded system design process with the model train controller example. (16)</div>
+<div class="qa-a">
+<p><strong>Design Process Steps:</strong> 1) Requirements gathering, 2) Conceptual specification, 3) Detailed specification (CPU, memory, I/O), 4) Architecture design, 5) Component design, 6) System integration, 7) Testing.</p>
+<p><strong>Model Train Controller:</strong> Goal: control speed of up to 8 model trains. Inputs: speed/direction buttons. Outputs: track voltage. One-way communication (track to train). Protocol uses CRC for error detection. Based on NEM 680/681 physical layer.</p>
+<p><strong>Key Non-functional:</strong> Cost (manufacturing + development), Performance (WCET analysis), Power (wall-powered for controller), Size.</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">2</span> Explain ARM processor architecture (ARM7TDMI). (16)</div>
+<div class="qa-a">
+<p><strong>ARM Family:</strong> ARM is a RISC architecture family. ARM does not manufacture &mdash; it licenses IP to partners. Versions: ARMv4, ARMv4T, ARMv5T, ARMv5TE, ARMv6.</p>
+<p><strong>ARM7TDMI:</strong> T=Thumb (16-bit), D=Debug, M=Multiplier (64-bit result), I=EmbeddedICE.</p>
+<p><strong>3-Stage Pipeline:</strong> Fetch (from memory), Decode (decode instruction), Execute (ALU/register access).</p>
+<p><strong>Registers:</strong> 37 total (30 general-purpose + 7 status). R0-R12 general, R13=SP, R14=LR, R15=PC. CPSR holds NZCV flags + mode bits (M[4:0]) + IRQ/FIQ disable bits.</p>
+<p><strong>7 Processor Modes:</strong> User, FIQ, IRQ, Supervisor, Abort, Undefined, System.</p>
+<p><strong>Features:</strong> Conditional execution on every instruction, barrel shifter for free shifts, load-store architecture, multiple register load/store (LDM/STM).</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">3</span> Explain ARM instruction set &mdash; data processing, branch, multiply, and load/store. (16)</div>
+<div class="qa-a">
+<p><strong>Data Processing:</strong> ADD, SUB, RSB (reverse subtract), AND, ORR, EOR, BIC (bit clear). Format: ADD R0, R1, R2 (R0 = R1 + R2). Immediate: ADD R0, R1, #5.</p>
+<p><strong>Multiply:</strong> MUL R4, R5, R6 (R4 = R5*R6). MLA R4, R5, R6, R7 (R4 = R5*R6 + R7). Restrictions: operands must be different registers.</p>
+<p><strong>Branch:</strong> B (unconditional), BL (branch+link for subroutines), BX (branch+exchange to Thumb). B{cond} for conditional.</p>
+<p><strong>Load/Store:</strong> LDR (load word), STR (store word). LDRB/STRB for bytes. Pre-indexed LDR R0, [R1, #4]!. Post-indexed LDR R0, [R1], #4. LDM/STM for multiple registers.</p>
+<p><strong>CMP:</strong> CMP R0,R1 subtracts and sets flags without storing result.</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">4</span> Explain supervisor mode, exceptions, assembly linking &amp; loading. (16)</div>
+<div class="qa-a">
+<p><strong>Supervisor Mode:</strong> Privileged mode entered via SWI instruction or reset. Allows access to protected resources. SWI takes 24-bit argument passed to supervisor handler.</p>
+<p><strong>Exceptions:</strong> Reset (highest priority), Data Abort, FIQ, IRQ, Prefetch Abort, SWI, Undefined Instruction. Each saves PC to LR_mode and CPSR to SPSR_mode.</p>
+<p><strong>Assembly - Linking - Loading:</strong> Assembly (.s) &rarr; Assembler translates to object file (.o) with relocation tables. Linker resolves symbols across .o files, assigns absolute addresses. Loader copies linked binary into memory, sets up stack, starts execution.</p>
+<p><strong>Performance Analysis:</strong> WCET analysis &mdash; measure worst-case instruction count x CPI. Profiling tools identify bottlenecks.</p>
+</div>
+</div>
+</div>
 </section>
-<!-- UNIT 3 -->
+<!-- UNIT III -->
 <section class="section" id="unit3">
-    <div class="section-header">
-        <div class="eyebrow">Unit III</div>
-        <h2 class="display-lg">IoT &amp; Arduino Programming</h2>
-        <p>IoT Concepts - Arduino - Sensors &amp; Actuators Integration</p>
-    </div>
-    <div class="qa-section">
-        <h3>Unit III Key Points</h3>
-        <div class="one-mark-grid">
-            <div class="one-mark-item"><div class="q">What is IoT?</div><div class="a">Network of physical objects with sensors/software to collect/exchange data via internet.</div></div>
-            <div class="one-mark-item"><div class="q">4-Layer IoT Architecture</div><div class="a">Sensors/Actuators - Gateways - Edge IT - Cloud/Data Center</div></div>
-            <div class="one-mark-item"><div class="q">IoT Features</div><div class="a">Connectivity, AI, Sensing, Active Engagement, Endpoint Management</div></div>
-            <div class="one-mark-item"><div class="q">What is Arduino?</div><div class="a">Open-source electronics platform. ATmega328P, 16MHz, 32KB Flash, 2KB SRAM.</div></div>
-            <div class="one-mark-item"><div class="q">Arduino setup() vs loop()</div><div class="a">setup(): runs once at start. loop(): runs repeatedly forever.</div></div>
-            <div class="one-mark-item"><div class="q">digitalWrite vs analogWrite</div><div class="a">digitalWrite: HIGH/LOW. analogWrite: PWM 0-255.</div></div>
-            <div class="one-mark-item"><div class="q">What is a Shield?</div><div class="a">Plug-in board adding WiFi, motor control, sensor functionality.</div></div>
-            <div class="one-mark-item"><div class="q">Sensor vs Actuator</div><div class="a">Sensor: detects environment. Actuator: performs physical action.</div></div>
-            <div class="one-mark-item"><div class="q">IoT vs Computer</div><div class="a">IoT: special-purpose, low power, single task. Computer: general-purpose, multi-tasking.</div></div>
-            <div class="one-mark-item"><div class="q">What is a Gateway?</div><div class="a">Manages bidirectional traffic between devices and cloud, translates protocols.</div></div>
-            <div class="one-mark-item"><div class="q">6 IoT Decision Areas</div><div class="a">UX, Data, Business, Technology, Security, Standards &amp; Regulations</div></div>
-            <div class="one-mark-item"><div class="q">What is Edge IT?</div><div class="a">Pre-processing at edge before sending to cloud, saves bandwidth.</div></div>
-            <div class="one-mark-item"><div class="q">Arduino UNO PWM pins</div><div class="a">Pins 3,5,6,9,10,11 (6 pins with ~). 10-bit analog inputs A0-A5.</div></div>
-        </div>
-    </div>
-    <button class="section-toggle" onclick="toggleSection('u3-16mark')">Toggle Unit III 16-Mark Questions</button>
-    <div class="qa-section" id="u3-16mark" style="display:none;">
-        <h3>Unit III 16-Mark Questions</h3>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">1</span> Explain IoT architecture, components, and decision framework. (16)</div>
-            <div class="qa-a">
-                <p><strong>4-Stage Architecture:</strong> Stage1: Sensors/Actuators (GPS, RFID, gyroscope, electrochemical - connect via LAN/PAN). Stage2: Gateways &amp; Networks (WiFi, Ethernet, GSM, 5G - aggregate and translate). Stage3: Edge IT (pre-process, only send changed data to cloud). Stage4: Cloud/Data Center (analytics, management, security, end-user apps).</p>
-                <p><strong>5 Components:</strong> Smart Devices/Sensors, Gateway (protocol translation + security), Cloud (storage + analytics), Analytics (insights from data), User Interface (mobile apps, dashboards).</p>
-                <p><strong>6 Decision Areas:</strong> UX (user requirements), Data (flow strategy), Business (monetization), Technology (solution selection), Security (protection at each layer), Standards/Regulations (compliance).</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">2</span> Explain Arduino programming and sensor/actuator integration. (16)</div>
-            <div class="qa-a">
-                <p><strong>Arduino UNO Specs:</strong> ATmega328P, 16MHz, 32KB Flash, 2KB SRAM, 1KB EEPROM, 14 digital I/O, 6 analog inputs, 5V operating voltage.</p>
-                <p><strong>Programming Structure:</strong> setup() runs once (pinMode, Serial.begin). loop() runs forever (read sensors, control actuators).</p>
-                <p><strong>Key Functions:</strong> pinMode(pin, mode), digitalWrite(pin, value), digitalRead(pin), analogWrite(pin, value), analogRead(pin), delay(ms), Serial.print/read/available.</p>
-                <p><strong>Sensor Integration:</strong> DHT11 (temp/humidity) on pin 2. Read: dht.readTemperature(). PIR motion sensor, HC-SR04 ultrasonic, LDR light sensor.</p>
-                <p><strong>Actuator Control:</strong> Relay module for high-power devices, servo motor (Servo.h), DC motor (L298N driver), buzzer, LED.</p>
-            </div>
-        </div>
-    </div>
+<div class="section-header">
+<div class="eyebrow">Unit III</div>
+<h2 class="display-lg">Processes and Operating Systems</h2>
+<p>RTOS &mdash; Task Assignment &amp; Scheduling &mdash; Priority Scheduling &mdash; IPC &mdash; Distributed Embedded Systems &mdash; MPSoCs</p>
+</div>
+<div class="topic-grid">
+<div class="topic-card">
+<span class="badge badge-purple">RTOS</span>
+<h3>Real-Time Operating Systems</h3>
+<p>Deterministic scheduling with timing guarantees. Hard RTOS (airbag, flight control) vs Soft (multimedia) vs Firm. Microkernel design: scheduler, timers, interrupts, system calls.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-blue">Scheduling</span>
+<h3>Tasks, Scheduling &amp; Priority</h3>
+<p>Process states: waiting, ready, executing. Scheduling policies: Rate Monotonic (RMS, static), Earliest Deadline First (EDF, dynamic), Round Robin. Utilization analysis.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-pink">IPC</span>
+<h3>Interprocess Communication</h3>
+<p>Shared memory, message passing, semaphores (binary/counting), mutexes, mailboxes, queues. Priority inversion &amp; inheritance. Deadlock prevention.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-orange">MPSoC</span>
+<h3>Distributed Systems &amp; MPSoCs</h3>
+<p>Multiprocessor SoCs for high performance. Shared memory vs message passing. Design examples: Audio Player, Engine Control Unit, Video Accelerator.</p>
+</div>
+</div>
+<div class="arch-diagram">
+<h4>RTOS Microkernel Structure</h4>
+<div class="concept-flow">
+<span class="node" style="background:#7a3dff;">Scheduler</span>
+<span class="node" style="background:#3b89ff;">Task Manager</span>
+<span class="node" style="background:#00d722;">IPC</span>
+<span class="node" style="background:#ff6b00;">Timer</span>
+<span class="node" style="background:#ed52cb;">ISR</span>
+<span class="node" style="background:#080808;">Syscalls</span>
+</div>
+<div class="tip-box" style="margin-bottom:0;">
+<strong>RTOS vs GPOS:</strong> GPOS = fairness, avg bandwidth, non-deterministic. RTOS = guaranteed response, strict timing, preemptive priority scheduling (FreeRTOS, VxWorks, uC/OS).
+</div>
+</div>
+<div class="combo-card">
+<div class="part"><h4>Scheduling Policies</h4><p><strong>RMS:</strong> Shorter period = higher priority. Utilization bound U = n(2<sup>1/n</sup>-1) &rarr; ~69% for large n.</p><p><strong>EDF:</strong> Nearest deadline = highest priority. Up to 100% utilization.</p><p><strong>Round Robin:</strong> Fixed time slice per task.</p></div>
+<div class="part"><h4>Process States</h4><p><strong>Waiting:</strong> Can't execute (I/O, resource).<br/><strong>Ready:</strong> Can execute, waiting for CPU.<br/><strong>Executing:</strong> Running on CPU.<br/>Context switch: Save PCB &rarr; scheduler &rarr; load PCB &rarr; resume.</p></div>
+<div class="part"><h4>IPC Mechanisms</h4><p><strong>Semaphore:</strong> Binary (0/1) or Counting (N). Synchronization primitive.<br/><strong>Mutex:</strong> Binary semaphore with priority inheritance.<br/><strong>Mailbox:</strong> Message queue with fixed-size messages.</p></div>
+</div>
+<div class="highlight-box">
+<strong>Unit III Syllabus:</strong> Structure of a Real-Time System &mdash; Task Assignment &amp; Scheduling &mdash; Multiple Tasks &amp; Processes &mdash; Multirate Systems &mdash; Preemptive RTOS &mdash; Priority-Based Scheduling &mdash; IPC Mechanisms &mdash; Distributed Embedded Systems &mdash; MPSoCs &amp; Shared Memory &mdash; Design Examples: Audio Player, ECU, Video Accelerator.
+</div>
+<button class="section-toggle" onclick="toggleSection('u3-1mark')">Toggle Unit III 1-Mark Questions</button>
+<div class="qa-section" id="u3-1mark" style="display:none;">
+<h3>Unit III 1-Mark Questions (20)</h3>
+<div class="one-mark-grid">
+<div class="one-mark-item"><div class="q">1. What is RTOS?</div><div class="a">Real-Time OS &mdash; deterministic task scheduling with guaranteed timing.</div></div>
+<div class="one-mark-item"><div class="q">2. Hard vs Soft RTOS?</div><div class="a">Hard: deadline miss = failure (airbag). Soft: miss = degraded (video).</div></div>
+<div class="one-mark-item"><div class="q">3. What are the 3 process states?</div><div class="a">Waiting, Ready, Executing.</div></div>
+<div class="one-mark-item"><div class="q">4. What is context switching?</div><div class="a">Save current task state (PCB), restore another task's state, resume execution.</div></div>
+<div class="one-mark-item"><div class="q">5. What is a PCB?</div><div class="a">Process Control Block &mdash; stores PC, registers, SP, memory info, priority, state.</div></div>
+<div class="one-mark-item"><div class="q">6. What is preemptive scheduling?</div><div class="a">Higher priority task can interrupt (preempt) lower priority task.</div></div>
+<div class="one-mark-item"><div class="q">7. What is RMS?</div><div class="a">Rate Monotonic Scheduling &mdash; static priority, shorter period = higher priority.</div></div>
+<div class="one-mark-item"><div class="q">8. RMS utilization bound for large n?</div><div class="a">~69% (ln 2).</div></div>
+<div class="one-mark-item"><div class="q">9. What is EDF?</div><div class="a">Earliest Deadline First &mdash; dynamic, nearest deadline = highest priority, up to 100% utilization.</div></div>
+<div class="one-mark-item"><div class="q">10. 3 reasons for kernel to take control?</div><div class="a">System calls, scheduling/timers, external interrupts.</div></div>
+<div class="one-mark-item"><div class="q">11. What is a semaphore?</div><div class="a">Synchronization primitive for shared resource access. Wait() and Signal().</div></div>
+<div class="one-mark-item"><div class="q">12. Binary vs Counting semaphore?</div><div class="a">Binary: 0/1. Counting: N &gt; 1 (multiple resources).</div></div>
+<div class="one-mark-item"><div class="q">13. What is priority inversion?</div><div class="a">Low-priority task holds resource needed by high-priority task.</div></div>
+<div class="one-mark-item"><div class="q">14. Solution to priority inversion?</div><div class="a">Priority inheritance &mdash; low task temporarily inherits high task's priority.</div></div>
+<div class="one-mark-item"><div class="q">15. What is a mutex?</div><div class="a">Binary semaphore with priority inheritance, mutual exclusion for shared resource.</div></div>
+<div class="one-mark-item"><div class="q">16. What is a mailbox in IPC?</div><div class="a">Message queue &mdash; tasks send/receive fixed-size messages through kernel-managed queue.</div></div>
+<div class="one-mark-item"><div class="q">17. What is MPSoC?</div><div class="a">Multi-Processor System-on-Chip &mdash; multiple CPUs on one chip for parallel processing.</div></div>
+<div class="one-mark-item"><div class="q">18. Shared memory vs message passing?</div><div class="a">Shared: direct memory access (fast, sync needed). Message: kernel-mediated (safe, slower).</div></div>
+<div class="one-mark-item"><div class="q">19. What is multirate system?</div><div class="a">System with tasks running at different frequencies/periods.</div></div>
+<div class="one-mark-item"><div class="q">20. What does release time mean?</div><div class="a">Time when a process becomes ready to execute.</div></div>
+</div>
+</div>
+<button class="section-toggle" onclick="toggleSection('u3-16mark')">Toggle Unit III 16-Mark Questions</button>
+<div class="qa-section" id="u3-16mark" style="display:none;">
+<h3>Unit III 16-Mark Questions</h3>
+<div class="qa-item">
+<div class="qa-q"><span class="num">1</span> Explain RTOS structure, scheduling policies (RMS &amp; EDF), and timing analysis. (16)</div>
+<div class="qa-a">
+<p><strong>RTOS Microkernel:</strong> Minimal kernel providing scheduler, timers, ISR handling, system calls. Three trigger sources: system calls, scheduling/timer tick, external interrupts.</p>
+<p><strong>Process States:</strong> Waiting, Ready, Executing. Scheduler selects from ready queue. Context switching: save PCB (PC, registers, SP) &rarr; choose next &rarr; restore PCB &rarr; run.</p>
+<p><strong>RMS (Rate-Monotonic):</strong> Static priority. Shorter period = higher priority. Utilization bound U = n(2<sup>1/n</sup> - 1). For large n, limit = ln 2 &asymp; 69.3%. If total utilization &lt; bound, all deadlines met.</p>
+<p><strong>EDF (Earliest Deadline First):</strong> Dynamic &mdash; task with nearest deadline runs next. Up to 100% utilization possible.</p>
+<p><strong>Timing:</strong> Release time (when ready), deadline (worst allowed completion), period (for periodic tasks). Schedulability analysis validates all deadlines.</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">2</span> Explain IPC mechanisms, priority inversion, and design example (Audio Player). (16)</div>
+<div class="qa-a">
+<p><strong>IPC Mechanisms:</strong> 1) Semaphores &mdash; binary (0/1) or counting (N). Wait() decrements, Signal() increments. 2) Mutex &mdash; binary semaphore with priority inheritance. 3) Mailbox/Queue &mdash; kernel-managed message passing.</p>
+<p><strong>Priority Inversion:</strong> Low-priority task L holds mutex. Medium-priority M preempts L. High-priority H waits for mutex, stuck behind M. Solution: Priority inheritance &mdash; L temporarily inherits H's priority.</p>
+<p><strong>Audio Player Design:</strong> Tasks: 1) Read from storage (periodic), 2) Decode audio (CPU-intensive), 3) Output to DAC (real-time). IPC: buffer queue between reader and decoder, double-buffered output. Scheduling: output task highest priority.</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">3</span> Explain distributed embedded systems, MPSoCs, and shared memory multiprocessors. (16)</div>
+<div class="qa-a">
+<p><strong>Distributed Embedded Systems:</strong> Multiple processing nodes connected by network (CAN, Ethernet, I2C). Each node has own CPU + memory. Nodes communicate via message passing. Examples: automotive ECU network (CAN bus), home automation (ZigBee mesh).</p>
+<p><strong>MPSoCs:</strong> Multiple processor cores on single chip. Shared memory vs distributed memory. Homogeneous (all same) vs heterogeneous (CPU + DSP + GPU).</p>
+<p><strong>Shared Memory:</strong> All processors see same memory. Cache coherence protocols (MESI). Locking (spinlocks, mutexes) for synchronization.</p>
+<p><strong>ECU Example:</strong> Tasks &mdash; crankshaft position sensing (1ms), fuel injection (2ms), spark advance (1ms), lambda feedback (10ms), OBD diagnostics (100ms). RMS scheduling with hard deadlines. CAN bus for inter-ECU communication.</p>
+</div>
+</div>
+</div>
 </section>
-
-<!-- UNIT 4 -->
+<!-- UNIT IV -->
 <section class="section" id="unit4">
-    <div class="section-header">
-        <div class="eyebrow">Unit IV</div>
-        <h2 class="display-lg">IoT Communication &amp; Open Platforms</h2>
-        <p>Protocols: Bluetooth, WiFi, ZigBee, GPS, GSM - Raspberry Pi - Cloud</p>
-    </div>
-    <div class="qa-section">
-        <h3>Unit IV Key Points</h3>
-        <div class="one-mark-grid">
-            <div class="one-mark-item"><div class="q">Bluetooth</div><div class="a">~10m, 1-3 Mbps, low power, 2.4 GHz. Short-range pairing.</div></div>
-            <div class="one-mark-item"><div class="q">WiFi</div><div class="a">~100m, 54-600 Mbps, high power, 2.4/5 GHz. Home/building internet.</div></div>
-            <div class="one-mark-item"><div class="q">ZigBee</div><div class="a">~100m mesh, 250 Kbps, very low power. Smart home sensor nets.</div></div>
-            <div class="one-mark-item"><div class="q">GPS</div><div class="a">Global Positioning, 24 satellites, trilateration, 3-15m accuracy.</div></div>
-            <div class="one-mark-item"><div class="q">GSM</div><div class="a">Cellular, SIM card, SMS/voice/data. AT commands. NB-IoT.</div></div>
-            <div class="one-mark-item"><div class="q">Request-Response</div><div class="a">Client sends, server responds. HTTP/REST APIs.</div></div>
-            <div class="one-mark-item"><div class="q">Publish-Subscribe</div><div class="a">Devices publish to topics. Subscribers receive. MQTT.</div></div>
-            <div class="one-mark-item"><div class="q">Push-Pull</div><div class="a">Producers push to queue. Consumers pull. Message queues.</div></div>
-            <div class="one-mark-item"><div class="q">What is MQTT?</div><div class="a">Lightweight publish-subscribe protocol for IoT. Minimal bandwidth.</div></div>
-            <div class="one-mark-item"><div class="q">Raspberry Pi</div><div class="a">SBC with ARM CPU, GPIO, HDMI, USB. Full Linux.</div></div>
-            <div class="one-mark-item"><div class="q">6LoWPAN</div><div class="a">IPv6 over Low-Power WPAN. Energy-efficient IoT protocol.</div></div>
-            <div class="one-mark-item"><div class="q">LoRaWAN</div><div class="a">Long-range (2-15 km) low-power WAN. Sub-GHz.</div></div>
-            <div class="one-mark-item"><div class="q">Cloud in IoT</div><div class="a">AWS IoT, Azure, ThingSpeak, Firebase. Store/process/analyze.</div></div>
-            <div class="one-mark-item"><div class="q">IoT Security</div><div class="a">Change default passwords, disable unused services, HTTPS, firewall, logging.</div></div>
-        </div>
-    </div>
-    <h3>IoT Communication Protocols</h3>
-    <table class="proto-table">
-        <thead><tr><th>Protocol</th><th>Range</th><th>Speed</th><th>Power</th><th>Use Case</th></tr></thead>
-        <tbody>
-            <tr><td><strong>Bluetooth</strong></td><td>~10m</td><td>1-3 Mbps</td><td>Low</td><td>Short-range device pairing</td></tr>
-            <tr><td><strong>WiFi</strong></td><td>~100m</td><td>54-600 Mbps</td><td>High</td><td>Home/building internet</td></tr>
-            <tr><td><strong>ZigBee</strong></td><td>~100m mesh</td><td>250 Kbps</td><td>Very Low</td><td>Smart home sensor nets</td></tr>
-            <tr><td><strong>GPS</strong></td><td>Global</td><td>-</td><td>Medium</td><td>Location tracking</td></tr>
-            <tr><td><strong>GSM</strong></td><td>Cellular</td><td>14.4K-10Mbps</td><td>High</td><td>SMS, voice, data</td></tr>
-            <tr><td><strong>LoRaWAN</strong></td><td>2-15 km</td><td>0.3-50 Kbps</td><td>Very Low</td><td>Long-range low-power IoT</td></tr>
-        </tbody>
-    </table>
-    <button class="section-toggle" onclick="toggleSection('u4-16mark')">Toggle Unit IV 16-Mark Questions</button>
-    <div class="qa-section" id="u4-16mark" style="display:none;">
-        <h3>Unit IV 16-Mark Questions</h3>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">1</span> Compare Bluetooth, WiFi, ZigBee, GPS, and GSM. (16)</div>
-            <div class="qa-a">
-                <p><strong>Bluetooth (IEEE 802.15.1):</strong> 2.4 GHz, 10m, 1-3 Mbps, low power. Piconet/scatternet. BLE for IoT. Use: headsets, sensor data.</p>
-                <p><strong>WiFi (IEEE 802.11):</strong> 2.4/5 GHz, 100m, 54-600 Mbps, high power. Star topology with AP. Use: internet, streaming, home networks.</p>
-                <p><strong>ZigBee (IEEE 802.15.4):</strong> 2.4 GHz, 100m mesh, 250 Kbps, very low power. Self-healing mesh. Use: home automation, smart lighting, industrial monitoring.</p>
-                <p><strong>GPS:</strong> 1.5 GHz L1, global, no uplink, 3-15m accuracy. 24+ satellites. Use: navigation, fleet tracking, geofencing.</p>
-                <p><strong>GSM:</strong> 900/1800 MHz, cellular, up to 35km. 2G-4G. SIM auth. AT commands (SIM800). Use: SMS alerts, voice, NB-IoT.</p>
-                <p><strong>Selection Criteria:</strong> Range required, data rate, power budget, cost per node, topology (star/mesh), interoperability.</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">2</span> Explain IoT communication models and cloud connectivity. (16)</div>
-            <div class="qa-a">
-                <p><strong>4 Models:</strong></p>
-                <p>1. Request-Response: Client sends HTTP request, server responds. REST APIs.</p>
-                <p>2. Publish-Subscribe: Devices publish to topics. Subscribers receive via broker. MQTT is most common. Decoupled architecture.</p>
-                <p>3. Push-Pull: Producers push to queue. Consumers pull. Buffering and load-leveling.</p>
-                <p>4. Exclusive Pair: Direct persistent bidirectional connection. Real-time control.</p>
-                <p><strong>Cloud Connectivity Flow:</strong> Device collects sensor data -> Connects via WiFi/GSM -> Sends via HTTP/MQTT -> Cloud stores/processes -> User accesses via app.</p>
-                <p><strong>MQTT Example:</strong> ESP32 reads temp -> publishes "home/temp" -> Raspberry Pi broker receives -> Node-RED dashboard -> if temp > threshold -> publish "home/ac/on".</p>
-            </div>
-        </div>
-    </div>
+<div class="section-header">
+<div class="eyebrow">Unit IV</div>
+<h2 class="display-lg">IoT Architecture and Protocols</h2>
+<p>IoT Physical &amp; Logical Design &mdash; M2M &mdash; NETCONF-YANG &mdash; IoT Platform Methodology &mdash; Reference Model</p>
+</div>
+<div class="topic-grid">
+<div class="topic-card">
+<span class="badge badge-purple">IoT Design</span>
+<h3>IoT Physical &amp; Logical Design</h3>
+<p>Physical: IoT devices (sensors/actuators), gateways, cloud servers. Logical: 4 communication models (Req-Resp, Pub-Sub, Push-Pull, Exclusive Pair), protocols, data flow.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-blue">M2M</span>
+<h3>IoT vs M2M / NETCONF-YANG</h3>
+<p>M2M: direct machine-to-machine (SCADA, telemetry). IoT: internet-connected, cloud-based. NETCONF (RFC 6241) + YANG (RFC 6020) for network configuration management.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-green">Enabling Tech</span>
+<h3>IoT Enabling Technologies &amp; Domains</h3>
+<p>RFID/NFC, WSN, M2M, SCADA, cloud computing, IPv6 (6LoWPAN). Domain-specific: Smart Homes, Wearables, Smart Cities, Industrial IoT, Connected Health, Smart Agriculture.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-orange">Reference Model</span>
+<h3>IoT Reference &amp; Communication Model</h3>
+<p>Levels 1-7: Physical Devices &rarr; Connectivity &rarr; Edge Computing &rarr; Data Accumulation &rarr; Data Abstraction &rarr; Application &rarr; Collaboration.</p>
+</div>
+</div>
+<div class="arch-diagram">
+<h4>IoT Platform Design Methodology</h4>
+<div class="concept-flow">
+<span class="node" style="background:#7a3dff;">Purpose/Req</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#3b89ff;">Domain Model</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#00d722;">Info Model</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#ff6b00;">Service Model</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#ed52cb;">Comm Model</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#080808;">Deployment</span>
+</div>
+<div class="combo-card" style="margin-top:var(--space-lg);">
+<div class="part"><h4>IoT Communication Models</h4><p><strong>Req-Resp:</strong> Client sends request, server responds (HTTP/REST)<br/><strong>Pub-Sub:</strong> Publish to topics, broker delivers (MQTT)<br/><strong>Push-Pull:</strong> Producers push to queue, consumers pull<br/><strong>Exclusive Pair:</strong> Persistent bidirectional connection</p></div>
+<div class="part"><h4>IoT Reference Model (7 Levels)</h4><p>1. Physical Devices<br/>2. Connectivity<br/>3. Edge Computing<br/>4. Data Accumulation<br/>5. Data Abstraction<br/>6. Application<br/>7. Collaboration &amp; Processes</p></div>
+</div>
+<div class="tip-box">
+<strong>Key Difference &mdash; IoT vs M2M:</strong> M2M uses point-to-point communication (proprietary protocols). IoT uses IP-based internet connectivity with cloud/analytics layer. M2M = isolated machines talking. IoT = machines + cloud + apps + people.
+</div>
+</div>
+<h3>IoT Protocols Comparison</h3>
+<table class="proto-table">
+<thead><tr><th>Protocol</th><th>Range</th><th>Speed</th><th>Power</th><th>Use Case</th></tr></thead>
+<tbody>
+<tr><td><strong>Bluetooth/BLE</strong></td><td>~10m</td><td>1-3 Mbps</td><td>Very Low</td><td>Short-range device pairing, wearables</td></tr>
+<tr><td><strong>WiFi</strong></td><td>~100m</td><td>54-600 Mbps</td><td>High</td><td>Home/building internet, streaming</td></tr>
+<tr><td><strong>ZigBee</strong></td><td>~100m mesh</td><td>250 Kbps</td><td>Very Low</td><td>Smart home sensor networks</td></tr>
+<tr><td><strong>6LoWPAN</strong></td><td>~100m</td><td>250 Kbps</td><td>Very Low</td><td>IPv6 over low-power WPAN</td></tr>
+<tr><td><strong>LoRaWAN</strong></td><td>2-15 km</td><td>0.3-50 Kbps</td><td>Very Low</td><td>Long-range low-power WAN</td></tr>
+<tr><td><strong>GSM/NB-IoT</strong></td><td>Cellular</td><td>~200 Kbps</td><td>Low</td><td>Cellular IoT, SMS alerts</td></tr>
+</tbody>
+</table>
+<div class="highlight-box">
+<strong>Unit IV Syllabus:</strong> Internet of Things &mdash; Physical Design, Logical Design &mdash; IoT Enabling Technologies &mdash; Domain-Specific IoTs &mdash; IoT and M2M &mdash; IoT System Management with NETCONF-YANG &mdash; IoT Platform Design Methodology &mdash; IoT Reference Model &mdash; Domain Model &mdash; Communication Model.
+</div>
+<button class="section-toggle" onclick="toggleSection('u4-1mark')">Toggle Unit IV 1-Mark Questions</button>
+<div class="qa-section" id="u4-1mark" style="display:none;">
+<h3>Unit IV 1-Mark Questions (20)</h3>
+<div class="one-mark-grid">
+<div class="one-mark-item"><div class="q">1. What is IoT?</div><div class="a">Network of physical objects with sensors/software to collect and exchange data via internet.</div></div>
+<div class="one-mark-item"><div class="q">2. Physical design components?</div><div class="a">IoT devices (sensors/actuators), gateways, cloud servers.</div></div>
+<div class="one-mark-item"><div class="q">3. 4 IoT communication models?</div><div class="a">Req-Resp, Pub-Sub, Push-Pull, Exclusive Pair.</div></div>
+<div class="one-mark-item"><div class="q">4. What is M2M?</div><div class="a">Machine-to-Machine &mdash; direct wired/wireless communication between devices.</div></div>
+<div class="one-mark-item"><div class="q">5. IoT vs M2M key difference?</div><div class="a">M2M = point-to-point, isolated. IoT = IP-based, cloud connected.</div></div>
+<div class="one-mark-item"><div class="q">6. What is NETCONF?</div><div class="a">Network Configuration Protocol (RFC 6241) for managing network device configuration.</div></div>
+<div class="one-mark-item"><div class="q">7. What is YANG?</div><div class="a">Yet Another Next Generation (RFC 6020) &mdash; data modeling language for NETCONF.</div></div>
+<div class="one-mark-item"><div class="q">8. IoT enabling technologies (5)?</div><div class="a">RFID/NFC, WSN, M2M, SCADA, Cloud Computing.</div></div>
+<div class="one-mark-item"><div class="q">9. What is WSN?</div><div class="a">Wireless Sensor Network &mdash; spatially distributed sensors monitoring environment.</div></div>
+<div class="one-mark-item"><div class="q">10. Domain-specific IoT examples?</div><div class="a">Smart Homes, Wearables, Smart Cities, Industrial IoT, Health, Agriculture.</div></div>
+<div class="one-mark-item"><div class="q">11. What is 6LoWPAN?</div><div class="a">IPv6 over Low-Power Wireless Personal Area Networks.</div></div>
+<div class="one-mark-item"><div class="q">12. IoT Reference Model has how many levels?</div><div class="a">7 levels (Physical to Collaboration).</div></div>
+<div class="one-mark-item"><div class="q">13. What is a Domain Model in IoT?</div><div class="a">Describes IoT system entities (device, sensor, actuator, service, resource).</div></div>
+<div class="one-mark-item"><div class="q">14. What is an IoT Communication Model?</div><div class="a">Defines how devices exchange messages (Req-Resp, Pub-Sub, etc.).</div></div>
+<div class="one-mark-item"><div class="q">15. What is MQTT?</div><div class="a">Message Queue Telemetry Transport &mdash; lightweight pub-sub IoT protocol.</div></div>
+<div class="one-mark-item"><div class="q">16. IoT Platform Design steps?</div><div class="a">Purpose &rarr; Domain Model &rarr; Info Model &rarr; Service Model &rarr; Communication &rarr; Deployment.</div></div>
+<div class="one-mark-item"><div class="q">17. What is SCADA?</div><div class="a">Supervisory Control And Data Acquisition &mdash; industrial control system.</div></div>
+<div class="one-mark-item"><div class="q">18. Edge computing in IoT?</div><div class="a">Data processing near devices before sending to cloud. Saves bandwidth/latency.</div></div>
+<div class="one-mark-item"><div class="q">19. What is an IoT gateway?</div><div class="a">Bridge between IoT devices and cloud &mdash; protocol translation, filtering, security.</div></div>
+<div class="one-mark-item"><div class="q">20. What is ZigBee range in IoT?</div><div class="a">~100m per node, mesh topology extends coverage, 250 Kbps.</div></div>
+</div>
+</div>
+<button class="section-toggle" onclick="toggleSection('u4-16mark')">Toggle Unit IV 16-Mark Questions</button>
+<div class="qa-section" id="u4-16mark" style="display:none;">
+<h3>Unit IV 16-Mark Questions</h3>
+<div class="qa-item">
+<div class="qa-q"><span class="num">1</span> Explain IoT physical design, logical design, and enabling technologies in detail. (16)</div>
+<div class="qa-a">
+<p><strong>Physical Design:</strong> IoT devices (sensors like DHT11, PIR, ultrasonic; actuators like relays, motors), Gateways (protocol translation, security, data filtering), Cloud servers (AWS IoT, Azure, ThingSpeak &mdash; storage, analytics, visualization).</p>
+<p><strong>Logical Design (4 Models):</strong> 1) Request-Response: HTTP/REST. 2) Publish-Subscribe: MQTT topics &amp; broker. 3) Push-Pull: Queue buffering. 4) Exclusive Pair: Persistent connection.</p>
+<p><strong>Enabling Technologies:</strong> RFID/NFC (identification), WSN (wireless sensor mesh), M2M (industrial SCADA), Cloud Computing (scalable analytics), IPv6/6LoWPAN (vast addressing).</p>
+<p><strong>Domain-Specific IoTs:</strong> Smart Homes (lighting, security), Wearables (fitness), Smart Cities (traffic, parking), Industrial IoT, Connected Health, Smart Agriculture.</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">2</span> Explain IoT system management with NETCONF-YANG, platform methodology, and reference model. (16)</div>
+<div class="qa-a">
+<p><strong>NETCONF-YANG:</strong> NETCONF (RFC 6241) &mdash; XML-based RPCs for network device configuration. Operations: get, get-config, edit-config, copy-config, lock/unlock. Secure via SSH. YANG (RFC 6020) &mdash; data modeling language for configuration and state data.</p>
+<p><strong>Platform Design Methodology:</strong> 1) Define purpose &amp; requirements. 2) Define domain model (entities, relationships). 3) Define information model (JSON/XML schema). 4) Define service model (APIs, MQTT topics). 5) Define communication model. 6) Deployment.</p>
+<p><strong>IoT Reference Model (7 Levels):</strong> L1: Physical Devices. L2: Connectivity. L3: Edge Computing. L4: Data Accumulation. L5: Data Abstraction. L6: Application. L7: Collaboration &amp; Processes.</p>
+<p><strong>Additional Models:</strong> Domain Model (entities &amp; relationships), Communication Model (message exchange), Deployment Model (edge vs cloud).</p>
+</div>
+</div>
+</div>
 </section>
-
-<!-- UNIT 5 -->
+<!-- UNIT V -->
 <section class="section" id="unit5">
-    <div class="section-header">
-        <div class="eyebrow">Unit V</div>
-        <h2 class="display-lg">Applications Development</h2>
-        <p>Embedded System Design - Smart Home - Smart Agriculture - Smart Cities - Smart Healthcare</p>
-    </div>
-    <div class="topic-grid">
-        <div class="topic-card">
-            <span class="badge badge-orange">Home Automation</span>
-            <h3>Smart Home IoT</h3>
-            <p>IoT controls lighting, HVAC, security, appliances. Motion/temp sensors + relays + cloud + smartphone app.</p>
-            <div class="concept-flow"><span class="node">Sensor</span><span class="arrow">-></span><span class="node" style="background:#7a3dff;">Controller</span><span class="arrow">-></span><span class="node" style="background:#3b89ff;">WiFi</span><span class="arrow">-></span><span class="node" style="background:#00d722;">App</span></div>
-        </div>
-        <div class="topic-card">
-            <span class="badge badge-green">Smart Agriculture</span>
-            <h3>Smart Farming</h3>
-            <p>Soil moisture sensor -> auto irrigation. DHT11, rain sensor, ultrasonic. ESP32 + relay + pump. 40% water saving.</p>
-        </div>
-        <div class="topic-card">
-            <span class="badge badge-blue">Smart Cities</span>
-            <h3>Urban IoT</h3>
-            <p>Adaptive traffic lights, smart parking (ultrasonic), waste mgmt (fill-level), smart street lighting (LDR+motion saves 60%).</p>
-        </div>
-        <div class="topic-card">
-            <span class="badge badge-pink">Smart Healthcare</span>
-            <h3>Health IoT</h3>
-            <p>Wearable monitors (HR, BP, ECG). AD8232 + ESP32 -> Cloud -> Doctor. Remote patient monitoring, emergency alerts.</p>
-        </div>
-    </div>
-    <div class="arch-diagram">
-        <h4>Embedded System Design Flow</h4>
-        <div class="concept-flow">
-            <span class="node" style="background:#7a3dff;">Problem Def</span><span class="arrow">-></span>
-            <span class="node" style="background:#3b89ff;">HW Design</span><span class="arrow">-></span>
-            <span class="node" style="background:#00d722;">SW Dev</span><span class="arrow">-></span>
-            <span class="node" style="background:#ff6b00;">Integration</span><span class="arrow">-></span>
-            <span class="node" style="background:#ed52cb;">Testing</span><span class="arrow">-></span>
-            <span class="node" style="background:#080808;">Deployment</span>
-        </div>
-    </div>
-    <button class="section-toggle" onclick="toggleSection('u5-16mark')">Toggle Unit V 16-Mark Questions</button>
-    <div class="qa-section" id="u5-16mark" style="display:none;">
-        <h3>Unit V 16-Mark Questions</h3>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">1</span> Explain IoT in Smart Home, Agriculture, Cities, Healthcare. (16)</div>
-            <div class="qa-a">
-                <p><strong>Smart Home:</strong> Motion (PIR), temp (DHT11), door sensors + relays + ESP32/Arduino + WiFi + Cloud + App. Voice control (Alexa). Nest thermostat learns schedule.</p>
-                <p><strong>Smart Agriculture:</strong> Soil moisture sensor + ESP32 + relay pump. If moisture < threshold -> pump on. SMS/App notification. Water savings ~40%. Drone crop analysis, livestock GPS tracking.</p>
-                <p><strong>Smart Cities:</strong> Traffic lights (adaptive timing), parking (ultrasonic + cloud + app), waste (fill-level + optimal route), street lighting (LDR + motion, 60% energy saving). WSN with GPS, RFID, electrochemical sensors.</p>
-                <p><strong>Smart Healthcare:</strong> Wearable sensors (MAX30100 HR, AD8232 ECG, LM35 temp, SpO2). Data to cloud via WiFi/GSM. Doctor monitors real-time. Alerts for abnormal values. Reduced hospital stays.</p>
-            </div>
-        </div>
-        <div class="qa-item">
-            <div class="qa-q"><span class="num">2</span> Explain complete embedded system design process. (16)</div>
-            <div class="qa-a">
-                <p><strong>1. Problem Definition:</strong> Requirements, constraints (cost/power/size), specifications. Example: Smart water quality monitor for fish tank.</p>
-                <p><strong>2. Hardware Design:</strong> Microcontroller selection, sensor choice, power supply, schematic/PCB, comm module.</p>
-                <p><strong>3. Software Development:</strong> Embedded C/Arduino code, sensor reading, data processing, protocol stack (MQTT/HTTP), error handling, watchdog.</p>
-                <p><strong>4. Integration:</strong> HW+SW integration, sensor calibration, comm testing, power validation.</p>
-                <p><strong>5. Testing:</strong> Unit -> Integration -> System -> Environmental -> EMC -> User acceptance.</p>
-                <p><strong>6. Deployment:</strong> Final firmware, enclosure, field installation, training, documentation, maintenance plan, OTA updates.</p>
-            </div>
-        </div>
-    </div>
+<div class="section-header">
+<div class="eyebrow">Unit V</div>
+<h2 class="display-lg">IoT System Design</h2>
+<p>Raspberry Pi &mdash; Linux on RPi &mdash; Python Programming &mdash; Interfaces &mdash; Case Studies: Home Automation, Smart Cities, Agriculture</p>
+</div>
+<div class="topic-grid">
+<div class="topic-card">
+<span class="badge badge-purple">Raspberry Pi</span>
+<h3>Raspberry Pi Board &amp; Linux</h3>
+<p>SBC with Broadcom BCM2835/2837 (ARM CPU), GPIO, HDMI, USB, Ethernet. Runs Raspberry Pi OS (Debian-based). Linux: file system, package management, networking.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-blue">Python</span>
+<h3>Python for IoT Programming</h3>
+<p>RPi.GPIO, GPIO Zero libraries. Read sensors, control actuators. Flask web server. MQTT client (paho-mqtt). Data logging, cloud upload.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-green">Home Automation</span>
+<h3>Smart Home Case Study</h3>
+<p>Raspberry Pi + PIR motion + DHT11 temp/humidity + relay control for lights/fan. MQTT to cloud. App-based control. Voice assistant integration.</p>
+</div>
+<div class="topic-card">
+<span class="badge badge-orange">Smart City</span>
+<h3>Smart Cities &amp; Agriculture</h3>
+<p>City: adaptive traffic, smart parking (ultrasonic + cloud), waste management (fill-level), smart lighting (LDR+motion &mdash; 60% saving). Agriculture: soil moisture + auto irrigation.</p>
+</div>
+</div>
+<div class="arch-diagram">
+<h4>Basic Building Blocks of an IoT Device</h4>
+<div class="concept-flow">
+<span class="node" style="background:#7a3dff;">Sensor</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#3b89ff;">ADC/GPIO</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#00d722;">Processor</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#ff6b00;">Connectivity</span><span class="arrow">&rarr;</span>
+<span class="node" style="background:#ed52cb;">Cloud/App</span>
+</div>
+<div class="tip-box" style="margin-bottom:0;">
+<strong>Raspberry Pi:</strong> Powerful IoT gateway/controller &mdash; multicore ARM CPU, 40-pin GPIO, HDMI, USB, Ethernet/WiFi, full Linux. Python, Node.js, C/C++ for IoT apps.
+</div>
+</div>
+<div class="combo-card">
+<div class="part"><h4>Raspberry Pi Interfaces</h4><p><strong>GPIO:</strong> 40 pins digital I/O, 3.3V logic<br/><strong>I2C:</strong> SDA/SCL for sensors<br/><strong>SPI:</strong> MOSI/MISO/SCLK/CS<br/><strong>UART:</strong> TX/RX for GPS<br/><strong>PWM:</strong> GPIO 12/13/18/19</p></div>
+<div class="part"><h4>Python Snippets</h4><p><code>import RPi.GPIO as GPIO<br/>GPIO.setmode(GPIO.BCM)<br/>GPIO.setup(18, GPIO.OUT)<br/>GPIO.output(18, GPIO.HIGH)</code><br/><br/><code>import paho.mqtt.client as mqtt<br/>client = mqtt.Client()<br/>client.connect("broker.hivemq.com")<br/>client.publish("home/temp", "25.5")</code></p></div>
+<div class="part"><h4>IoT Device Building Blocks</h4><p><strong>Sensor:</strong> DHT11, PIR, HC-SR04, LDR, soil moisture<br/><strong>Connectivity:</strong> WiFi (ESP32/RPi), BLE, ZigBee<br/><strong>Power:</strong> 5V USB, battery + regulator<br/><strong>Storage:</strong> SD card, flash<br/><strong>Firmware:</strong> MicroPython, Linux</p></div>
+</div>
+<div class="highlight-box">
+<strong>Unit V Syllabus:</strong> Basic building blocks of an IoT device &mdash; Raspberry Pi Board &mdash; Linux on Raspberry Pi &mdash; Interfaces &mdash; Programming with Python &mdash; Case Studies: Home Automation, Smart Cities, Environment &amp; Agriculture.
+</div>
+<button class="section-toggle" onclick="toggleSection('u5-1mark')">Toggle Unit V 1-Mark Questions</button>
+<div class="qa-section" id="u5-1mark" style="display:none;">
+<h3>Unit V 1-Mark Questions (20)</h3>
+<div class="one-mark-grid">
+<div class="one-mark-item"><div class="q">1. Basic building blocks of IoT device?</div><div class="a">Sensor, ADC/GPIO, Processor, Connectivity, Power, Storage.</div></div>
+<div class="one-mark-item"><div class="q">2. What is Raspberry Pi?</div><div class="a">SBC with ARM CPU, GPIO, HDMI, USB, Ethernet/WiFi. Runs Linux.</div></div>
+<div class="one-mark-item"><div class="q">3. Default OS for Raspberry Pi?</div><div class="a">Raspberry Pi OS (formerly Raspbian &mdash; Debian-based Linux).</div></div>
+<div class="one-mark-item"><div class="q">4. How many GPIO pins on RPi?</div><div class="a">40-pin header, 26 GPIO pins usable.</div></div>
+<div class="one-mark-item"><div class="q">5. RPi GPIO voltage?</div><div class="a">3.3V logic level. NOT 5V tolerant on input.</div></div>
+<div class="one-mark-item"><div class="q">6. Python library for GPIO on RPi?</div><div class="a">RPi.GPIO or GPIO Zero.</div></div>
+<div class="one-mark-item"><div class="q">7. RPi I2C pins?</div><div class="a">GPIO 2 (SDA) and GPIO 3 (SCL).</div></div>
+<div class="one-mark-item"><div class="q">8. RPi SPI pins?</div><div class="a">GPIO 10 (MOSI), 9 (MISO), 11 (SCLK), 8 (CS0), 7 (CS1).</div></div>
+<div class="one-mark-item"><div class="q">9. RPi UART pins?</div><div class="a">GPIO 14 (TXD) and GPIO 15 (RXD).</div></div>
+<div class="one-mark-item"><div class="q">10. RPi hardware PWM pins?</div><div class="a">GPIO 12, 13, 18, 19.</div></div>
+<div class="one-mark-item"><div class="q">11. Connect DHT11 to RPi?</div><div class="a">VCC to 3.3V, DATA to GPIO (pull-up), GND to GND. Use Adafruit_DHT.</div></div>
+<div class="one-mark-item"><div class="q">12. Connect relay to RPi?</div><div class="a">VCC to 5V, IN to GPIO, GND to GND. GPIO HIGH = relay ON.</div></div>
+<div class="one-mark-item"><div class="q">13. MQTT publish code?</div><div class="a"><code>client.publish("topic", "payload")</code> with paho-mqtt.</div></div>
+<div class="one-mark-item"><div class="q">14. Flask route example?</div><div class="a"><code>@app.route('/led/on')<br/>def led_on(): GPIO.output(18,1)</code></div></div>
+<div class="one-mark-item"><div class="q">15. Smart home automation flow?</div><div class="a">Sensor detect &rarr; RPi process &rarr; MQTT publish &rarr; Cloud &rarr; App.</div></div>
+<div class="one-mark-item"><div class="q">16. Smart parking IoT solution?</div><div class="a">Ultrasonic sensor per spot &rarr; ESP32/RPi &rarr; cloud app &rarr; availability.</div></div>
+<div class="one-mark-item"><div class="q">17. Smart agriculture irrigation?</div><div class="a">Soil moisture sensor &rarr; if dry &rarr; relay ON pump &rarr; 40% water saving.</div></div>
+<div class="one-mark-item"><div class="q">18. Smart street lighting?</div><div class="a">LDR + PIR &rarr; dim normally, bright on motion &rarr; 60% energy saving.</div></div>
+<div class="one-mark-item"><div class="q">19. What is OTA update?</div><div class="a">Over-The-Air &mdash; wirelessly update IoT device firmware remotely.</div></div>
+<div class="one-mark-item"><div class="q">20. Environment monitoring IoT?</div><div class="a">DHT11 + MQ-135 + rain sensor + BMP280 &rarr; cloud dashboard &rarr; alerts.</div></div>
+</div>
+</div>
+<button class="section-toggle" onclick="toggleSection('u5-16mark')">Toggle Unit V 16-Mark Questions</button>
+<div class="qa-section" id="u5-16mark" style="display:none;">
+<h3>Unit V 16-Mark Questions</h3>
+<div class="qa-item">
+<div class="qa-q"><span class="num">1</span> Explain Raspberry Pi board, Linux, interfaces, and Python programming for IoT. (16)</div>
+<div class="qa-a">
+<p><strong>Raspberry Pi Board:</strong> Broadcom BCM2835/BCM2837 SoC with ARM Cortex CPU (up to 1.4GHz). 40-pin GPIO, HDMI, USB 2.0/3.0, Ethernet, WiFi/BT, microSD, 5V USB-C power.</p>
+<p><strong>Linux on RPi:</strong> Raspberry Pi OS (Debian Bookworm). Enable SSH, configure WiFi, apt update. raspi-config enables I2C, SPI, UART. systemctl manages services.</p>
+<p><strong>Interfaces:</strong> GPIO (RPi.GPIO), I2C (multi-sensor bus), SPI (high-speed), UART (serial console/GPS), PWM (servo/LED).</p>
+<p><strong>Python Flow:</strong> Import RPi.GPIO, dht11, paho-mqtt. Setup GPIO. Main loop: read sensor &rarr; MQTT publish &rarr; check commands &rarr; control actuators. Flask web interface for browser control.</p>
+</div>
+</div>
+<div class="qa-item">
+<div class="qa-q"><span class="num">2</span> Explain IoT case studies &mdash; Smart Home, Smart Cities, Smart Agriculture, and Environment. (16)</div>
+<div class="qa-a">
+<p><strong>Smart Home:</strong> RPi + DHT11 + PIR + relay. MQTT to cloud dashboard. Auto climate control, motion-triggered lights. Smartphone control from anywhere. Voice assistant integration.</p>
+<p><strong>Smart Cities:</strong> Smart Parking (ultrasonic + app), Smart Waste (fill-level + optimal route &mdash; 30% fuel savings), Adaptive Traffic (cameras/IR + dynamic signals), Smart Lighting (LDR+PIR &mdash; 60% energy saving).</p>
+<p><strong>Smart Agriculture:</strong> Soil moisture sensor &rarr; auto irrigation &rarr; 40% water savings. DHT11 + rain sensor + BMP280 weather station. Drone NDVI for crop health. Livestock GPS tracking via LoRaWAN.</p>
+<p><strong>Environment:</strong> DHT11 + MQ-135 (air quality) + BME280 + rain sensor &rarr; cloud dashboard &rarr; pollution/weather alerts.</p>
+</div>
+</div>
+</div>
 </section>
-
 <!-- GLOBAL Q&A BANK -->
 <section class="section" id="qa-bank">
-    <div class="section-header">
-        <div class="eyebrow">Complete Q&A Bank</div>
-        <h2 class="display-lg">CS3691 All 5 Units Question Bank</h2>
-        <p>Part A: 1-Mark (60+) - Part B: 16-Mark (20+) - Covers entire syllabus</p>
-    </div>
-    <div class="unit-toc">
-        <a href="#qa-u1">Unit I</a><a href="#qa-u2">Unit II</a><a href="#qa-u3">Unit III</a>
-        <a href="#qa-u4">Unit IV</a><a href="#qa-u5">Unit V</a>
-    </div>
-    <div class="qa-section" id="qa-u1">
-        <h3>Unit I - 8-Bit Embedded Processor</h3>
-        <button class="section-toggle" style="background:var(--accent-blue);" onclick="toggleSection('qa-u1-1')">1-Mark Qs (20)</button>
-        <div id="qa-u1-1" style="display:none;">
-            <div class="one-mark-grid">
-                <div class="one-mark-item"><div class="q">1. 8051 is which architecture?</div><div class="a">Harvard architecture with separate program/data buses.</div></div>
-                <div class="one-mark-item"><div class="q">2. How many pins in 8051?</div><div class="a">40 pins in DIP package. 32 I/O + 8 control/power.</div></div>
-                <div class="one-mark-item"><div class="q">3. What is the function of RST pin?</div><div class="a">Reset - active high for 2 machine cycles to reset microcontroller.</div></div>
-                <div class="one-mark-item"><div class="q">4. What is the bit-addressable RAM area?</div><div class="a">20H-2FH (16 bytes = 128 individually addressable bits).</div></div>
-                <div class="one-mark-item"><div class="q">5. Which register controls timer modes?</div><div class="a">TMOD (Timer Mode) register at address 89H.</div></div>
-                <div class="one-mark-item"><div class="q">6. What is SMOD bit?</div><div class="a">In PCON register - doubles serial baud rate when set.</div></div>
-                <div class="one-mark-item"><div class="q">7. What is RETI?</div><div class="a">Return from Interrupt - restores PC from stack and re-enables interrupts.</div></div>
-                <div class="one-mark-item"><div class="q">8. Which pins are for external interrupts?</div><div class="a">P3.2 (INT0) and P3.3 (INT1). Active low.</div></div>
-                <div class="one-mark-item"><div class="q">9. How many bytes per register bank?</div><div class="a">8 bytes (R0-R7). 4 banks = 32 bytes total.</div></div>
-                <div class="one-mark-item"><div class="q">10. What is the stack area in 8051?</div><div class="a">Grows upward from SP (initial 07H) using internal RAM.</div></div>
-                <div class="one-mark-item"><div class="q">11. Which instruction reads external RAM?</div><div class="a">MOVX A, @DPTR or MOVX A, @Ri.</div></div>
-                <div class="one-mark-item"><div class="q">12. What is CJNE?</div><div class="a">Compare and Jump if Not Equal - conditional jump instruction.</div></div>
-                <div class="one-mark-item"><div class="q">13. What is the use of DA instruction?</div><div class="a">Decimal Adjust - adjusts BCD addition result in accumulator.</div></div>
-                <div class="one-mark-item"><div class="q">14. What is the maximum crystal frequency?</div><div class="a">4-30 MHz typical. 12 MHz most common for standard baud rates.</div></div>
-                <div class="one-mark-item"><div class="q">15. What is the size of PC in 8051?</div><div class="a">16-bit Program Counter can address 64KB (0000H-FFFFH).</div></div>
-            </div>
-        </div>
-        <button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u1-16')">16-Mark Qs (5)</button>
-        <div id="qa-u1-16" style="display:none;">
-            <div class="qa-item"><div class="qa-q"><span class="num">1</span> 8051 architecture detail. (16)</div><div class="qa-a">CPU (ALU+Control), 4KB ROM, 128B RAM, 4 I/O ports, 2 timers, UART, interrupt controller. Harvard architecture. Key registers: ACC, B, PSW, DPTR, SP, PC. Internal RAM: register banks, bit-addressable, scratchpad. SFRs for peripheral control.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">2</span> Pin diagram of 8051. (16)</div><div class="qa-a">40-pin DIP. VCC(40), GND(20), XTAL1(19), XTAL2(18), RST(9), PSEN(29), ALE(30), EA(31). P0(32-39) AD0-AD7, P1(1-8), P2(21-28) A8-A15, P3(10-17) with alt functions RXD,TXD,INT0,INT1,T0,T1,WR,RD.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">3</span> Addressing modes with examples. (16)</div><div class="qa-a">Immediate: MOV A,#6AH. Direct: MOV A,04H. Register: MOV A,R4. Indirect: MOV A,@R0. Indexed: MOVC A,@A+DPTR. Each with opcode size and cycle count.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">4</span> Timer/counter and serial communication. (16)</div><div class="qa-a">TMOD modes 0-3. TCON flags. Mode 1 most common (16-bit). Delay = (65536-Init)x1us for 12MHz. SCON for serial modes. SBUF data buffer. Baud rate from Timer 1.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">5</span> Interrupt system with all registers. (16)</div><div class="qa-a">6 sources with vector addresses. IE register (EA+individual enables). IP for priority. TCON for trigger type. Process: flag set -> enable check -> save PC -> vector -> ISR -> RETI.</div></div>
-        </div>
-    </div>
-    <div class="qa-section" id="qa-u2">
-        <h3>Unit II - Embedded C Programming</h3>
-        <button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u2-16')">16-Mark Qs (4)</button>
-        <div id="qa-u2-16" style="display:none;">
-            <div class="qa-item"><div class="qa-q"><span class="num">1</span> Memory interfacing in 8051. (16)</div><div class="qa-a">P0 AD0-AD7 with ALE latch. P2 A8-A15. PSEN for ROM, RD/WR for RAM. MOVX for ext RAM. EA=VCC internal+external. Max 64KB each. Internal RAM organization: banks, bit-addressable, scratchpad, SFRs.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">2</span> Embedded C with examples. (16)</div><div class="qa-a">sfr, sbit, volatile keywords. Bit manipulation macros. LED blink code: #include<reg51.h> sbit LED=P1^0; void delay(){...} void main(){while(1){LED=0;delay();LED=1;delay();}}</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">3</span> RTOS - need, types, components. (16)</div><div class="qa-a">Need: deterministic response, multiple tasks, modular dev. Types: Hard (strict), Soft (relaxed), Firm. Components: scheduler, task manager, IPC (queues/semaphores/mutexes), memory manager, timers.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">4</span> Context switching and scheduling. (16)</div><div class="qa-a">PCB saves PC, regs, SP, memory info. Flow: TaskA -> interrupt -> save -> scheduler -> restore -> TaskB. Preemptive vs non-preemptive. RM, EDF, Round Robin. Priority inversion and inheritance.</div></div>
-        </div>
-    </div>
-    <div class="qa-section" id="qa-u3">
-        <h3>Unit III - IoT &amp; Arduino</h3>
-        <button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u3-16')">16-Mark Qs (2)</button>
-        <div id="qa-u3-16" style="display:none;">
-            <div class="qa-item"><div class="qa-q"><span class="num">1</span> IoT architecture and decision framework. (16)</div><div class="qa-a">4 layers: Sensors/Actuators -> Gateways -> Edge IT -> Cloud. 5 components: Devices, Gateway, Cloud, Analytics, UI. 6 decision areas: UX, Data, Business, Technology, Security, Standards. Real-life example: AC temp sensor->gateway->cloud->phone app.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">2</span> Arduino and sensor integration. (16)</div><div class="qa-a">UNO specs. setup()+loop() structure. Functions: pinMode, digitalWrite/Read, analogWrite/Read, Serial. DHT11 sensor + relay example. Sensor types: temperature (DHT11), motion (PIR), distance (HC-SR04), light (LDR).</div></div>
-        </div>
-    </div>
-    <div class="qa-section" id="qa-u4">
-        <h3>Unit IV - IoT Communication</h3>
-        <button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u4-16')">16-Mark Qs (2)</button>
-        <div id="qa-u4-16" style="display:none;">
-            <div class="qa-item"><div class="qa-q"><span class="num">1</span> Protocol comparison. (16)</div><div class="qa-a">BT: 2.4GHz, 10m, 3Mbps, low. WiFi: 2.4/5GHz, 100m, 600Mbps, high. ZigBee: 2.4GHz, 100m mesh, 250Kbps, very low. GPS: 1.5GHz, global, - Mbps, medium. GSM: 900/1800MHz, cellular, 10Mbps, high. Selection: range, speed, power, cost.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">2</span> Communication models and cloud. (16)</div><div class="qa-a">Req-Resp (HTTP/REST). Pub-Sub (MQTT - topics/broker). Push-Pull (queues). Exclusive Pair (direct). Cloud flow: device->internet->cloud->app. MQTT: ESP32 publishes to topic, broker delivers to subscribers.</div></div>
-        </div>
-    </div>
-    <div class="qa-section" id="qa-u5">
-        <h3>Unit V - Applications</h3>
-        <button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u5-16')">16-Mark Qs (2)</button>
-        <div id="qa-u5-16" style="display:none;">
-            <div class="qa-item"><div class="qa-q"><span class="num">1</span> IoT applications in 4 domains. (16)</div><div class="qa-a">Home: motion/temp -> ESP32 -> WiFi -> app. Agri: soil moisture -> auto pump -> SMS alert (40% water saving). City: parking (ultrasonic+cloud), traffic (adaptive), lighting (LDR+motion, 60% saving). Health: ECG+ESP32 -> cloud -> doctor, real-time alerts.</div></div>
-            <div class="qa-item"><div class="qa-q"><span class="num">2</span> Embedded system design flow. (16)</div><div class="qa-a">Problem Def -> HW Design (MCU, sensors, power, PCB) -> SW Dev (C/Arduino, MQTT, watchdog) -> Integration (calibrate, test comms) -> Testing (unit to acceptance) -> Deployment (firmware, enclosure, docs, OTA).</div></div>
-        </div>
-    </div>
+<div class="section-header">
+<div class="eyebrow">Complete Q&A Bank</div>
+<h2 class="display-lg">ET3491 All 5 Units Question Bank</h2>
+<p>Part A: 1-Mark (100+) &mdash; Part B: 16-Mark (15+) &mdash; Regulation 2021 &mdash; 204 pages covered</p>
+</div>
+<div class="unit-toc">
+<a href="#qa-u1">Unit I</a><a href="#qa-u2">Unit II</a><a href="#qa-u3">Unit III</a>
+<a href="#qa-u4">Unit IV</a><a href="#qa-u5">Unit V</a>
+</div>
+<div class="qa-section" id="qa-u1">
+<h3>Unit I &mdash; 8-Bit Embedded Processor</h3>
+<button class="section-toggle" style="background:var(--accent-blue);" onclick="toggleSection('qa-u1-1')">1-Mark Qs (20)</button>
+<div id="qa-u1-1" style="display:none;">
+<div class="one-mark-grid">
+<div class="one-mark-item"><div class="q">1. 8051 architecture type?</div><div class="a">Harvard architecture &mdash; separate program/data buses.</div></div>
+<div class="one-mark-item"><div class="q">2. How many pins in 8051?</div><div class="a">40 pins DIP. 32 I/O + 8 control/power.</div></div>
+<div class="one-mark-item"><div class="q">3. Function of PSEN?</div><div class="a">Program Store Enable &mdash; read strobe for external program memory.</div></div>
+<div class="one-mark-item"><div class="q">4. Bit-addressable RAM area?</div><div class="a">20H-2FH (16 bytes = 128 addressable bits).</div></div>
+<div class="one-mark-item"><div class="q">5. TMOD register address?</div><div class="a">89H. Configures Timer 0 (bits 0-3) and Timer 1 (bits 4-7).</div></div>
+<div class="one-mark-item"><div class="q">6. What is SMOD bit?</div><div class="a">PCON.7 &mdash; doubles serial baud rate when set.</div></div>
+<div class="one-mark-item"><div class="q">7. What does RETI do?</div><div class="a">Return from Interrupt &mdash; restores PC, re-enables interrupts.</div></div>
+<div class="one-mark-item"><div class="q">8. External interrupt pins?</div><div class="a">P3.2 (INT0) and P3.3 (INT1), active low.</div></div>
+<div class="one-mark-item"><div class="q">9. Size of register bank?</div><div class="a">8 bytes per bank (R0-R7). 4 banks = 32 bytes total.</div></div>
+<div class="one-mark-item"><div class="q">10. Stack initial location?</div><div class="a">SP = 07H after reset. Stack starts at 08H.</div></div>
+<div class="one-mark-item"><div class="q">11. MOVX instruction use?</div><div class="a">Access external data RAM via DPTR or Ri.</div></div>
+<div class="one-mark-item"><div class="q">12. What is CJNE?</div><div class="a">Compare and Jump if Not Equal &mdash; conditional branch.</div></div>
+<div class="one-mark-item"><div class="q">13. DA instruction?</div><div class="a">Decimal Adjust accumulator after BCD addition.</div></div>
+<div class="one-mark-item"><div class="q">14. Max crystal frequency?</div><div class="a">4-30 MHz typical. 12 MHz for standard baud rates.</div></div>
+<div class="one-mark-item"><div class="q">15. PC size in 8051?</div><div class="a">16-bit &mdash; addresses 64KB (0000H-FFFFH).</div></div>
+<div class="one-mark-item"><div class="q">16. What is SJMP?</div><div class="a">Short Jump &mdash; 2-byte, range -128 to +127 bytes.</div></div>
+<div class="one-mark-item"><div class="q">17. Which SFRs are bit-addressable?</div><div class="a">Addresses ending with 0H or 8H: P0(80H), TCON(88H), P1(90H), SCON(98H), P2(A0H), IE(A8H), P3(B0H), IP(B8H).</div></div>
+<div class="one-mark-item"><div class="q">18. Machine cycles for MOV A,R4?</div><div class="a">1 machine cycle. Register direct is fastest.</div></div>
+<div class="one-mark-item"><div class="q">19. Role of A register?</div><div class="a">Accumulator &mdash; default for arithmetic, data transfer, I/O.</div></div>
+<div class="one-mark-item"><div class="q">20. SFR addresses range?</div><div class="a">80H to FFH. Only 21 SFRs actually implemented.</div></div>
+</div>
+</div>
+<button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u1-16')">16-Mark Qs (5)</button>
+<div id="qa-u1-16" style="display:none;">
+<div class="qa-item"><div class="qa-q"><span class="num">1</span> 8051 architecture detail. (16)</div><div class="qa-a"><strong>CPU</strong> (ALU+Control), <strong>4KB ROM</strong>, <strong>128B RAM</strong> (register banks + bit-addressable + scratchpad + SFRs), <strong>4 I/O ports</strong>, <strong>2 timers</strong> (4 modes), <strong>UART</strong> (4 modes), <strong>interrupt controller</strong> (6 sources, 2 priority levels). Harvard architecture, 64KB external address space.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">2</span> Pin diagram of 8051. (16)</div><div class="qa-a"><strong>Power:</strong> VCC(40)=+5V, GND(20). <strong>Osc:</strong> XTAL1(19), XTAL2(18). <strong>Control:</strong> RST(9) reset, PSEN(29), ALE(30), EA(31). <strong>Ports:</strong> P0(32-39) AD0-AD7, P1(1-8), P2(21-28) A8-A15, P3(10-17) alt functions.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">3</span> Addressing modes with examples. (16)</div><div class="qa-a"><strong>Immediate:</strong> MOV A,#6AH. <strong>Direct:</strong> MOV A,04H. <strong>Register:</strong> MOV A,R4. <strong>Indirect:</strong> MOV A,@R0. <strong>Indexed:</strong> MOVC A,@A+DPTR.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">4</span> Timer/counter and serial communication. (16)</div><div class="qa-a"><strong>TMOD</strong> &mdash; GATE,C/T,M1,M0 per timer. <strong>4 modes:</strong> 0(13-bit), 1(16-bit), 2(8-bit auto-reload), 3(split). <strong>Serial:</strong> SCON selects mode, SBUF data, TI/RI flags. Baud = (2^SMOD/32) x (Fosc/(12x(256-TH1))).</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">5</span> Interrupt system. (16)</div><div class="qa-a"><strong>6 sources:</strong> Reset(0000H), INT0(0003H), T0(000BH), INT1(0013H), T1(001BH), Serial(0023H). <strong>IE:</strong> EA+individual enables. <strong>IP:</strong> priority bits. <strong>TCON:</strong> ITx for edge/level, IEx pending, TFx overflow.</div></div>
+</div>
+</div>
+<div class="qa-section" id="qa-u2">
+<h3>Unit II &mdash; Embedded System Design &amp; ARM Processor</h3>
+<button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u2-16')">16-Mark Qs (4)</button>
+<div id="qa-u2-16" style="display:none;">
+<div class="qa-item"><div class="qa-q"><span class="num">1</span> Embedded system design process with model train controller. (16)</div><div class="qa-a"><strong>Steps:</strong> Requirements &rarr; Conceptual Spec &rarr; Detailed Spec &rarr; Architecture &rarr; Components &rarr; Integration &rarr; Testing. <strong>Model Train:</strong> 8 trains, speed via UART, CRC, NEM 680/681 protocol.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">2</span> ARM processor architecture (ARM7TDMI). (16)</div><div class="qa-a"><strong>ARM7TDMI:</strong> 32-bit RISC, 3-stage pipeline, 37 registers. <strong>7 modes:</strong> User,FIQ,IRQ,Supervisor,Abort,Undefined,System. <strong>CPSR:</strong> NZCV flags + M[4:0] modes. Barrel shifter, conditional execution.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">3</span> ARM instruction set. (16)</div><div class="qa-a"><strong>DP:</strong> ADD,SUB,RSB,AND,ORR,EOR,BIC. <strong>MUL:</strong> MUL,MLA. <strong>Branch:</strong> B,BL,BX,B{cond}. <strong>Load/Store:</strong> LDR/STR, LDM/STM, pre/post-indexed.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">4</span> Supervisor mode, exceptions, linking/loading. (16)</div><div class="qa-a"><strong>SWI</strong> enters Supervisor mode. <strong>Exceptions:</strong> Reset, Abort, FIQ, IRQ, SWI, Undefined. <strong>Assembly-Linking-Loading:</strong> .s &rarr; assembler &rarr; .o &rarr; linker resolves symbols &rarr; executable &rarr; loader copies to memory.</div></div>
+</div>
+</div>
+<div class="qa-section" id="qa-u3">
+<h3>Unit III &mdash; Processes &amp; Operating Systems</h3>
+<button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u3-16')">16-Mark Qs (3)</button>
+<div id="qa-u3-16" style="display:none;">
+<div class="qa-item"><div class="qa-q"><span class="num">1</span> RTOS structure, RMS, EDF scheduling. (16)</div><div class="qa-a"><strong>Microkernel:</strong> scheduler, timers, ISR, syscalls. <strong>3 states:</strong> waiting, ready, executing. <strong>RMS:</strong> static, shorter period=higher, bound ~69%. <strong>EDF:</strong> dynamic, nearest deadline, up to 100% utilization.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">2</span> IPC, priority inversion, Audio Player design. (16)</div><div class="qa-a"><strong>IPC:</strong> Semaphores, Mutexes (priority inheritance), Mailboxes. <strong>Priority Inversion:</strong> low task blocks high &rarr; priority inheritance fixes. <strong>Audio Player:</strong> read&rarr;decode&rarr;output tasks. Buffer queue IPC. Output highest priority.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">3</span> Distributed systems, MPSoCs, shared memory. (16)</div><div class="qa-a"><strong>Distributed:</strong> Nodes on CAN/Ethernet, message passing. <strong>MPSoC:</strong> Multicore on one chip, shared vs distributed memory. <strong>ECU:</strong> crankshaft(1ms), injection(2ms), spark(1ms), lambda(10ms), OBD(100ms) on CAN bus.</div></div>
+</div>
+</div>
+<div class="qa-section" id="qa-u4">
+<h3>Unit IV &mdash; IoT Architecture &amp; Protocols</h3>
+<button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u4-16')">16-Mark Qs (2)</button>
+<div id="qa-u4-16" style="display:none;">
+<div class="qa-item"><div class="qa-q"><span class="num">1</span> IoT physical, logical design, enabling technologies. (16)</div><div class="qa-a"><strong>Physical:</strong> devices, gateways, cloud servers. <strong>4 Models:</strong> Req-Resp, Pub-Sub(MQTT), Push-Pull, Exclusive Pair. <strong>Enabling:</strong> RFID, WSN, M2M, SCADA, Cloud, 6LoWPAN. <strong>Domains:</strong> Home, Wearables, City, Industry, Health, Agri.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">2</span> NETCONF-YANG, platform methodology, reference model. (16)</div><div class="qa-a"><strong>NETCONF:</strong> XML-based network config (get, edit, copy, delete). <strong>YANG:</strong> data modeling lang. <strong>Platform Steps:</strong> Purpose&rarr;Domain&rarr;Info&rarr;Service&rarr;Comm&rarr;Deploy. <strong>7-Level Model:</strong> Physical&rarr;Connectivity&rarr;Edge&rarr;Accumulation&rarr;Abstraction&rarr;Application&rarr;Collaboration.</div></div>
+</div>
+</div>
+<div class="qa-section" id="qa-u5">
+<h3>Unit V &mdash; IoT System Design</h3>
+<button class="section-toggle" style="background:var(--accent-orange);" onclick="toggleSection('qa-u5-16')">16-Mark Qs (2)</button>
+<div id="qa-u5-16" style="display:none;">
+<div class="qa-item"><div class="qa-q"><span class="num">1</span> Raspberry Pi, Linux, interfaces, Python programming. (16)</div><div class="qa-a"><strong>RPi:</strong> Broadcom ARM SoC, 40-pin GPIO, HDMI, USB, WiFi/BT. <strong>OS:</strong> Raspberry Pi OS (Debian). <strong>Interfaces:</strong> GPIO(RPi.GPIO), I2C(SDA/SCL), SPI, UART, PWM. <strong>Python:</strong> GPIO.setup, paho-mqtt, Flask. Flow: sensor&rarr;MQTT&rarr;cloud&rarr;app&rarr;GPIO.</div></div>
+<div class="qa-item"><div class="qa-q"><span class="num">2</span> IoT case studies &mdash; Home, City, Agriculture. (16)</div><div class="qa-a"><strong>Home:</strong> DHT11+PIR+relay &rarr; MQTT &rarr; cloud app. <strong>City:</strong> Parking(ultrasonic), Waste(30% savings), Traffic(adaptive), Lighting(60% saving). <strong>Agri:</strong> Soil moisture &rarr; auto pump &rarr; 40% water saving. Drone NDVI. <strong>Environment:</strong> Air quality + weather &rarr; cloud &rarr; alerts.</div></div>
+</div>
+</div>
 </section>
-
 <!-- QUIZ -->
 <section class="section" id="quiz-section">
-    <div class="section-header">
-        <div class="eyebrow">Quick Quiz</div>
-        <h2 class="display-lg">Test Your Understanding</h2>
-        <p>15 questions covering all 5 units. Click an answer to check.</p>
-    </div>
-    <div id="quizContainer"></div>
-    <div style="text-align:center;margin-top:var(--space-2xl);" id="quizResult"></div>
+<div class="section-header">
+<div class="eyebrow">Quick Quiz</div>
+<h2 class="display-lg">Test Your Understanding</h2>
+<p>20 questions covering all 5 units of ET3491. Click an answer to check.</p>
+</div>
+<div id="quizContainer"></div>
+<div style="text-align:center;margin-top:var(--space-2xl);" id="quizResult"></div>
 </section>
-
 <section style="padding:var(--space-3xl);text-align:center;border-top:1px solid var(--hairline);">
-    <p style="color:var(--body-mid);font-size:14px;">CS3691 - Embedded Systems &amp; IoT - Complete Study Guide - All 322 pages covered</p>
+<p style="color:var(--body-mid);font-size:14px;">ET3491 &mdash; Embedded Systems &amp; IoT Design &mdash; Complete Study Guide &mdash; Regulation 2021 &mdash; All 204 pages covered</p>
 </section>
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-arch">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('modal-arch')">&times;</button>
-        <h2>8051 Architecture Deep Dive</h2>
-        <div class="tip-box"><strong>Think of 8051 as a factory:</strong><br/>CPU = Factory Manager<br/>ROM = Blueprint Cabinet<br/>RAM = Workbench<br/>I/O Ports = Loading Docks<br/>Timers = Alarm Clocks<br/>Interrupts = Doorbells</div>
-        <h4>What is Harvard Architecture?</h4>
-        <p style="font-size:14px;">8051 uses Harvard architecture - separate buses for program (ROM) and data (RAM). Can read instruction AND access data simultaneously - faster than Von Neumann.</p>
-        <h4>Why 8051 is still popular?</h4>
-        <ul style="font-size:14px;padding-left:var(--space-xl);">
-            <li>Simple &amp; easy to learn - perfect for beginners</li>
-            <li>Widely available and cheap</li>
-            <li>Huge community support</li>
-            <li>Bit-addressable - work with individual bits</li>
-            <li>Used in millions of products</li>
-        </ul>
-    </div>
+<div class="modal-content">
+<button class="modal-close" onclick="closeModal('modal-arch')">&times;</button>
+<h2>8051 Architecture Deep Dive</h2>
+<div class="tip-box"><strong>Think of 8051 as a factory:</strong><br/>CPU = Manager, ROM = Blueprint Cabinet, RAM = Workbench, I/O Ports = Docks, Timers = Alarm Clocks, Interrupts = Doorbells</div>
+<h4>Harvard Architecture</h4>
+<p style="font-size:14px;">8051 uses Harvard architecture &mdash; separate buses for program (ROM) and data (RAM). Can read instruction AND access data simultaneously &mdash; faster than Von Neumann.</p>
+<h4>Key Components</h4>
+<ul style="font-size:14px;padding-left:var(--space-xl);">
+<li><strong>ALU:</strong> 8-bit arithmetic + logic + single-bit operations</li>
+<li><strong>ACC:</strong> Accumulator, main work register</li>
+<li><strong>B Register:</strong> Used with ACC for MUL/DIV</li>
+<li><strong>PSW:</strong> Flags &mdash; CY, AC, F0, RS1, RS0, OV, P</li>
+<li><strong>DPTR:</strong> 16-bit data pointer</li>
+<li><strong>SP:</strong> Stack pointer (initial 07H)</li>
+<li><strong>PC:</strong> 16-bit program counter (64KB)</li>
+</ul>
+</div>
 </div>
 <div class="modal-overlay" id="modal-inst">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('modal-inst')">&times;</button>
-        <h2>8051 Instruction Set &amp; Programming</h2>
-        <div class="code-block"><span class="comment">; 8051 Assembly - Add two numbers</span>
+<div class="modal-content">
+<button class="modal-close" onclick="closeModal('modal-inst')">&times;</button>
+<h2>8051 Instruction Set &amp; Programming</h2>
+<div class="code-block"><span class="comment">; 8051 Assembly &mdash; Add two numbers</span>
 <span class="keyword">ORG</span> <span class="num">0000H</span>
-<span class="keyword">MOV</span> A, <span class="num">#25H</span>      <span class="comment">; Load 25H into A</span>
-<span class="keyword">MOV</span> R1, <span class="num">#14H</span>     <span class="comment">; Load 14H into R1</span>
+<span class="keyword">MOV</span> A, <span class="num">#25H</span>      <span class="comment">; Load 25H</span>
+<span class="keyword">MOV</span> R1, <span class="num">#14H</span>     <span class="comment">; Load 14H</span>
 <span class="keyword">ADD</span> A, R1         <span class="comment">; A = 25H + 14H = 39H</span>
-<span class="keyword">MOV</span> P1, A         <span class="comment">; Send result to Port 1</span>
+<span class="keyword">MOV</span> P1, A         <span class="comment">; Result to Port 1</span>
 <span class="keyword">END</span></div>
-        <h4>5 Addressing Modes</h4>
-        <table class="proto-table"><thead><tr><th>Mode</th><th>Example</th><th>Use</th></tr></thead><tbody>
-            <tr><td>Immediate</td><td>MOV A,#25H</td><td>Load value directly</td></tr>
-            <tr><td>Register</td><td>ADD A,R1</td><td>Register value as operand</td></tr>
-            <tr><td>Direct</td><td>MOV A,40H</td><td>RAM address directly</td></tr>
-            <tr><td>Indirect</td><td>MOV A,@R0</td><td>Address in register</td></tr>
-            <tr><td>Indexed</td><td>MOVC A,@A+DPTR</td><td>Program memory access</td></tr>
-        </tbody></table>
-        <div class="tip-box"><strong>Mnemonics:</strong> MOV=move, ADD=add, SUBB=subtract with borrow, JMP=jump, CJNE=compare+if not equal jump, DJNZ=decrement+if not zero jump.</div>
-    </div>
+<h4>5 Addressing Modes</h4>
+<table class="proto-table"><thead><tr><th>Mode</th><th>Example</th><th>Use</th></tr></thead><tbody>
+<tr><td>Immediate</td><td>MOV A,#25H</td><td>Load value directly</td></tr>
+<tr><td>Register</td><td>ADD A,R1</td><td>Register value as operand</td></tr>
+<tr><td>Direct</td><td>MOV A,40H</td><td>RAM address directly</td></tr>
+<tr><td>Indirect</td><td>MOV A,@R0</td><td>Address in register</td></tr>
+<tr><td>Indexed</td><td>MOVC A,@A+DPTR</td><td>Program memory</td></tr>
+</tbody></table>
+</div>
 </div>
 <div class="modal-overlay" id="modal-timer">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('modal-timer')">&times;</button>
-        <h2>Timers &amp; Serial Port</h2>
-        <p><strong>Timer 0 &amp; Timer 1:</strong> Both 16-bit. THx (high byte) + TLx (low byte).</p>
-        <h4>4 Timer Modes:</h4>
-        <ul style="font-size:14px;padding-left:var(--space-xl);">
-            <li><strong>Mode 0:</strong> 13-bit timer (THx 8-bit + TLx 5-bit). Max count = 8192.</li>
-            <li><strong>Mode 1:</strong> 16-bit timer. Max count = 65536. Most common.</li>
-            <li><strong>Mode 2:</strong> 8-bit auto-reload. TLx counts, THx holds reload value. Used for baud rate.</li>
-            <li><strong>Mode 3:</strong> Split timer (T0 only). TL0 as 8-bit timer, TH0 as 8-bit timer.</li>
-        </ul>
-        <h4>Delay Calculation (12MHz):</h4>
-        <p style="font-size:14px;">Machine cycle = 12/12MHz = 1us. For 1ms: Load = 65536 - 1000 = 64536 (FC18H).</p>
-        <h4>Serial Communication:</h4>
-        <p style="font-size:14px;">SCON selects mode. SBUF holds data. TI flag = transmit complete. RI flag = receive complete. Baud rate from Timer 1: Baud = (2^SMOD/32) x (Fosc/(12x(256-TH1))).</p>
-    </div>
+<div class="modal-content">
+<button class="modal-close" onclick="closeModal('modal-timer')">&times;</button>
+<h2>Timers &amp; Serial Port</h2>
+<p><strong>Timer 0 &amp; Timer 1:</strong> Both 16-bit. THx (high) + TLx (low). TMOD configures mode.</p>
+<h4>4 Timer Modes:</h4>
+<ul style="font-size:14px;padding-left:var(--space-xl);">
+<li><strong>Mode 0:</strong> 13-bit (THx 8-bit + TLx 5-bit). Max = 8192.</li>
+<li><strong>Mode 1:</strong> 16-bit. Max = 65536. <strong>Most common.</strong></li>
+<li><strong>Mode 2:</strong> 8-bit auto-reload. For baud rate generation.</li>
+<li><strong>Mode 3:</strong> Split timer (T0 only).</li>
+</ul>
+<h4>Delay @ 12MHz:</h4>
+<p style="font-size:14px;">Machine cycle = 1us. For 1ms: Load = 65536 - 1000 = FC18H.</p>
+<h4>Serial:</h4>
+<p style="font-size:14px;">SCON selects mode. SBUF data buffer. TI/RI flags. Baud = (2<sup>SMOD</sup>/32) x (Fosc/(12x(256-TH1))).</p>
+</div>
 </div>
 <div class="modal-overlay" id="modal-int">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('modal-int')">&times;</button>
-        <h2>Interrupt Handling in 8051</h2>
-        <p><strong>6 Interrupt Sources:</strong> Reset (0000H), INT0 (0003H), Timer 0 (000BH), INT1 (0013H), Timer 1 (001BH), Serial (0023H).</p>
-        <p><strong>IE Register:</strong> EA (global), ES (serial), ET1 (T1), EX1 (INT1), ET0 (T0), EX0 (INT0).</p>
-        <p><strong>IP Register:</strong> PT1, PX1, PT0, PX0 - set = high priority.</p>
-        <p><strong>Process:</strong> Flag set -> Check enables -> Save PC to stack -> Vector address -> ISR -> RETI restores PC.</p>
-        <div class="tip-box"><strong>Analogy:</strong> "Interrupt is like a doorbell. You're cooking (main program), doorbell rings, you answer (ISR), then resume cooking exactly where you left off."</div>
-    </div>
+<div class="modal-content">
+<button class="modal-close" onclick="closeModal('modal-int')">&times;</button>
+<h2>Interrupt Handling in 8051</h2>
+<p><strong>6 Interrupt Sources:</strong> Reset(0000H), INT0(0003H), T0(000BH), INT1(0013H), T1(001BH), Serial(0023H).</p>
+<p><strong>IE Register (A8H):</strong> EA(7)=global, ES(4)=serial, ET1(3)=T1, EX1(2)=INT1, ET0(1)=T0, EX0(0)=INT0.</p>
+<p><strong>IP Register (B8H):</strong> PT1(3), PX1(2), PT0(1), PX0(0). 1=high priority.</p>
+<p><strong>TCON (88H):</strong> IT1/IT0 (1=edge, 0=level). IE1/IE0 (pending). TF1/TF0 (timer overflow).</p>
+<p><strong>Process:</strong> Flag set &rarr; Check IE &rarr; Save PC to stack &rarr; Vector &rarr; ISR &rarr; RETI restores PC.</p>
+<div class="tip-box"><strong>Analogy:</strong> "Interrupt is like a doorbell. You're cooking, doorbell rings, you answer, then resume cooking."</div>
 </div>
-
+</div>
 <script>
-// Toggle sections
 function toggleSection(id) {
-    const el = document.getElementById(id);
+    var el = document.getElementById(id);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
-
-// Nav active + progress
-const sections = document.querySelectorAll('section[id]');
-const navLinks = document.querySelectorAll('.nav-links a');
-window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => {
-        const top = s.offsetTop - 100;
+var sections = document.querySelectorAll('section[id]');
+var navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', function() {
+    var current = '';
+    sections.forEach(function(s) {
+        var top = s.offsetTop - 100;
         if (window.scrollY >= top) current = s.getAttribute('id');
     });
-    navLinks.forEach(l => {
+    navLinks.forEach(function(l) {
         l.classList.toggle('active', l.getAttribute('href') === '#' + current);
     });
-    const st = window.scrollY;
-    const dh = document.documentElement.scrollHeight - window.innerHeight;
+    var st = window.scrollY;
+    var dh = document.documentElement.scrollHeight - window.innerHeight;
     document.getElementById('progressFill').style.width = (st / dh * 100) + '%';
 });
-
-// Modals
 function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow = ''; }
-document.querySelectorAll('.modal-overlay').forEach(o => {
-    o.addEventListener('click', (e) => { if (e.target === o) { o.classList.remove('active'); document.body.style.overflow = ''; } });
+document.querySelectorAll('.modal-overlay').forEach(function(o) {
+    o.addEventListener('click', function(e) { if (e.target === o) { o.classList.remove('active'); document.body.style.overflow = ''; } });
 });
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(m => { m.classList.remove('active'); document.body.style.overflow = ''; }); }
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(function(m) { m.classList.remove('active'); document.body.style.overflow = ''; }); }
 });
-
-// Smooth scroll
-document.querySelectorAll('a[href^="#"]').forEach(a => {
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
     a.addEventListener('click', function(e) {
-        const t = document.querySelector(this.getAttribute('href'));
+        var t = document.querySelector(this.getAttribute('href'));
         if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     });
 });
-
-// Quiz
-const quizData = [
+var quizData = [
     { q: 'What architecture does 8051 use?', o: ['Von Neumann','Harvard','Princeton','Turing'], c: 1 },
     { q: 'How many bytes of internal RAM in 8051?', o: ['64','128','256','4KB'], c: 1 },
     { q: 'How many I/O ports in 8051?', o: ['2','3','4','5'], c: 2 },
-    { q: 'What does RTOS stand for?', o: ['Real-Time Operating System','Reduced Time Output System','Rapid Task Software','Real Transfer OS'], c: 0 },
-    { q: 'Which protocol uses publish-subscribe?', o: ['HTTP','FTP','MQTT','SMTP'], c: 2 },
+    { q: 'What does RTOS stand for?', o: ['Real-Time Operating System','Reduced Time Output','Rapid Task Software','Real Transfer OS'], c: 0 },
+    { q: 'Which IoT model uses publish-subscribe?', o: ['HTTP','REST API','MQTT','FTP'], c: 2 },
     { q: 'How many interrupt sources in 8051?', o: ['3','5','6','8'], c: 2 },
-    { q: 'Arduino setup() runs?', o: ['Once at start','Forever','On interrupt','On button press'], c: 0 },
-    { q: 'Which layer has sensors/actuators?', o: ['Application','Cloud','Gateway','Device'], c: 3 },
-    { q: 'In priority scheduling, higher priority = ?', o: ['Higher number','Lower number','Both equal','Depends on OS'], c: 1 },
-    { q: 'What does GPIO stand for?', o: ['General Purpose Input Output','Graphics Processing I/O','General Protocol IO','Global Purpose Interface'], c: 0 },
-    { q: 'What is ZigBee range?', o: ['10m','100m','1km','Global'], c: 1 },
-    { q: 'Which is NOT an IoT component?', o: ['Sensors','Gateway','CPU alone','Cloud'], c: 2 },
-    { q: 'What does sbit do?', o: ['Sets baud rate','Declares SFR bit','Starts timer','Clears flag'], c: 1 },
-    { q: 'Preemptive scheduling means?', o: ['Task runs to completion','Higher priority can interrupt','Round robin','No scheduling'], c: 1 },
-    { q: 'Retrofit project is:', o: ['Smart Home','Smart Healthcare','Smart Agriculture','Smart City'], c: 2 }
+    { q: 'ARM7TDMI pipeline stages?', o: ['4','3','5','2'], c: 1 },
+    { q: 'What does SWI instruction do?', o: ['Software Interrupt -> Supervisor','Switch I/O','Swap registers','Stop Watch'], c: 0 },
+    { q: 'In RMS, shorter period = ?', o: ['Lower priority','Higher priority','Equal','Depends'], c: 1 },
+    { q: 'RMS utilization bound for large n?', o: ['50%','69%','100%','80%'], c: 1 },
+    { q: 'What does YANG model in NETCONF?', o: ['Hardware','Data/config','Network cables','User interface'], c: 1 },
+    { q: 'IoT Reference Model levels?', o: ['5','6','7','4'], c: 2 },
+    { q: 'What is M2M?', o: ['Machine-to-Machine','Mobile-to-Mobile','Mail-to-Mail','Monitor'], c: 0 },
+    { q: 'Raspberry Pi GPIO voltage?', o: ['5V','3.3V','2.5V','1.8V'], c: 1 },
+    { q: 'Preemptive scheduling means?', o: ['Runs to completion','Higher priority interrupts','Round robin','None'], c: 1 },
+    { q: 'Highest priority 8051 interrupt?', o: ['INT0','Timer 0','Reset','Serial'], c: 2 },
+    { q: 'What is priority inheritance?', o: ['Low inherits high priority','High waits forever','Equal priority','None'], c: 0 },
+    { q: 'Smart agriculture water savings?', o: ['10%','25%','40%','80%'], c: 2 },
+    { q: 'How many ARM processor modes?', o: ['5','6','7','8'], c: 2 },
+    { q: 'ALE pin function on 8051?', o: ['Address Latch Enable','Arithmetic Logic Execute','Analog Level Enable','Auto Load'], c: 0 }
 ];
-
 function renderQuiz() {
-    const c = document.getElementById('quizContainer');
-    quizData.forEach((item, idx) => {
-        const box = document.createElement('div');
+    var c = document.getElementById('quizContainer');
+    quizData.forEach(function(item, idx) {
+        var box = document.createElement('div');
         box.className = 'quiz-box';
         box.innerHTML = '<h4>Q' + (idx+1) + ': ' + item.q + '</h4>' +
-            item.o.map((opt, oi) => '<button class="quiz-option" data-q="' + idx + '" onclick="checkAnswer(' + idx + ',' + oi + ')">' + String.fromCharCode(65+oi) + '. ' + opt + '</button>').join('') +
+            item.o.map(function(opt, oi) { return '<button class="quiz-option" data-q="' + idx + '" onclick="checkAnswer(' + idx + ',' + oi + ')">' + String.fromCharCode(65+oi) + '. ' + opt + '</button>'; }).join('') +
             '<div class="quiz-feedback" id="feedback-' + idx + '"></div>';
         c.appendChild(box);
     });
 }
-
 function checkAnswer(qIdx, optIdx) {
-    const item = quizData[qIdx];
-    const feedback = document.getElementById('feedback-' + qIdx);
-    const buttons = document.querySelectorAll('.quiz-option[data-q="' + qIdx + '"]');
-    buttons.forEach(b => b.disabled = true);
+    var item = quizData[qIdx];
+    var feedback = document.getElementById('feedback-' + qIdx);
+    var buttons = document.querySelectorAll('.quiz-option[data-q="' + qIdx + '"]');
+    buttons.forEach(function(b) { b.disabled = true; });
     if (optIdx === item.c) {
         buttons[optIdx].classList.add('correct');
         feedback.innerHTML = 'Correct!';
@@ -799,26 +979,29 @@ function checkAnswer(qIdx, optIdx) {
     }
 }
 renderQuiz();
-
-// 3D Background
 (function init3D() {
     try {
-        const container = document.createElement('div');
+        var container = document.createElement('div');
         container.id = 'canvas-container';
         document.body.appendChild(container);
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
-        const colors = [0x7a3dff, 0x3b89ff, 0x00d722, 0xff6b00, 0xed52cb, 0xffae13];
-        const geos = [new THREE.BoxGeometry(0.8,0.8,0.8), new THREE.IcosahedronGeometry(0.5), new THREE.OctahedronGeometry(0.6), new THREE.TorusGeometry(0.4,0.15,8,12)];
-        const shapes = [];
-        for (let i = 0; i < 30; i++) {
-            const g = geos[i % 4];
-            const m = new THREE.MeshBasicMaterial({ color: colors[i%6], wireframe: true, transparent: true, opacity: 0.12 + Math.random() * 0.13 });
-            const mesh = new THREE.Mesh(g, m);
+        var colors = [0x7a3dff, 0x3b89ff, 0x00d722, 0xff6b00, 0xed52cb, 0xffae13];
+        var geos = [
+            new THREE.BoxGeometry(0.8,0.8,0.8),
+            new THREE.IcosahedronGeometry(0.5),
+            new THREE.OctahedronGeometry(0.6),
+            new THREE.TorusGeometry(0.4,0.15,8,12)
+        ];
+        var shapes = [];
+        for (var i = 0; i < 30; i++) {
+            var g = geos[i % 4];
+            var m = new THREE.MeshBasicMaterial({ color: colors[i%6], wireframe: true, transparent: true, opacity: 0.12 + Math.random() * 0.13 });
+            var mesh = new THREE.Mesh(g, m);
             mesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20 - 5);
             mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
             mesh.userData = { rotSpeed: { x: (Math.random()-0.5)*0.01, y: (Math.random()-0.5)*0.01 }, floatSpeed: 0.002+Math.random()*0.005, floatPhase: Math.random()*Math.PI*2 };
@@ -828,8 +1011,8 @@ renderQuiz();
         camera.position.z = 8;
         function animate() {
             requestAnimationFrame(animate);
-            const time = Date.now() * 0.001;
-            shapes.forEach(mesh => {
+            var time = Date.now() * 0.001;
+            shapes.forEach(function(mesh) {
                 mesh.rotation.x += mesh.userData.rotSpeed.x;
                 mesh.rotation.y += mesh.userData.rotSpeed.y;
                 mesh.position.y += Math.sin(time * mesh.userData.floatSpeed + mesh.userData.floatPhase) * 0.002;
@@ -837,15 +1020,14 @@ renderQuiz();
             renderer.render(scene, camera);
         }
         animate();
-        window.addEventListener('resize', () => {
+        window.addEventListener('resize', function() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
     } catch(e) { console.log('3D skipped:', e.message); }
 })();
-
-console.log('CS3691 Complete Study Guide loaded');
+console.log('ET3491 Complete Study Guide loaded');
 </script>
 </body>
 </html>
