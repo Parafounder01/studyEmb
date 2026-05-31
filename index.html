@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS3691 — Embedded Systems & IoT Study Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        /* ============================================================
+           DESIGN SYSTEM — inspired by Webflow (from template)
+           ============================================================ */
+        :root {
+            --primary: #080808;
+            --canvas: #ffffff;
+            --ink: #080808;
+            --body: #363636;
+            --body-mid: #5a5a5a;
+            --mute: #898989;
+            --hairline: #d8d8d8;
+            --accent-purple: #7a3dff;
+            --accent-pink: #ed52cb;
+            --accent-blue: #3b89ff;
+            --accent-orange: #ff6b00;
+            --accent-green: #00d722;
+            --accent-yellow: #ffae13;
+            --accent-red: #ee1d36;
+            --rounded-sm: 4px;
+            --rounded-md: 8px;
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-2xl: 24px;
+            --space-3xl: 32px;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--body);
+            background: var(--canvas);
+            overflow-x: hidden;
+        }
+
+        /* ---------- TYPOGRAPHY ---------- */
+        h1, h2, h3, h4 { color: var(--ink); font-weight: 600; line-height: 1.2; }
+        .display-xxl { font-size: clamp(32px, 5vw, 56px); font-weight: 600; letter-spacing: -0.8px; }
+        .display-lg { font-size: clamp(24px, 3.5vw, 40px); font-weight: 600; }
+        .display-md { font-size: clamp(20px, 2.5vw, 28px); font-weight: 500; }
+        .eyebrow {
+            font-size: 13px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--accent-purple); margin-bottom: var(--space-sm);
+        }
+
+        /* ---------- BUTTONS ---------- */
+        .btn { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-md) var(--space-xl); border-radius: var(--rounded-sm); font-size: 15px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s ease; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline { background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline); }
+        .btn-outline:hover { background: #f5f5f5; }
+
+        /* ---------- NAV ---------- */
+        .nav-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(255,255,255,0.92); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--hairline);
+            padding: var(--space-lg) var(--space-3xl);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-bar .logo { font-size: 18px; font-weight: 600; color: var(--ink); text-decoration: none; }
+        .nav-bar .logo span { color: var(--accent-purple); }
+        .nav-links { display: flex; gap: var(--space-2xl); list-style: none; }
+        .nav-links a { color: var(--body-mid); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--ink); }
+
+        /* ---------- HERO ---------- */
+        .hero-band {
+            padding: 120px var(--space-3xl) 80px;
+            max-width: 1100px; margin: 0 auto;
+            text-align: center;
+        }
+        .hero-band h1 { margin-bottom: var(--space-lg); }
+        .hero-band p { max-width: 640px; margin: 0 auto var(--space-3xl); color: var(--body-mid); font-size: 18px; }
+        .hero-actions { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; }
+
+        /* ---------- SECTION ---------- */
+        .section {
+            padding: var(--space-3xl);
+            max-width: 1200px; margin: 0 auto;
+            border-bottom: 1px solid var(--hairline);
+        }
+        .section-header { text-align: center; margin-bottom: var(--space-3xl); }
+        .section-header h2 { margin-bottom: var(--space-sm); }
+
+        /* ---------- TOPIC CARD ---------- */
+        .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--space-2xl); }
+        .topic-card {
+            background: var(--canvas); border: 1px solid var(--hairline);
+            border-radius: var(--rounded-md); padding: var(--space-2xl);
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+            cursor: pointer;
+        }
+        .topic-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        .topic-card .badge {
+            display: inline-block; padding: 2px 10px; border-radius: 999px;
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            margin-bottom: var(--space-sm); letter-spacing: 0.5px;
+        }
+        .badge-purple { background: var(--accent-purple); color: #fff; }
+        .badge-pink { background: var(--accent-pink); color: #fff; }
+        .badge-blue { background: var(--accent-blue); color: #fff; }
+        .badge-orange { background: var(--accent-orange); color: #fff; }
+        .badge-green { background: var(--accent-green); color: #000; }
+        .topic-card h3 { font-size: 18px; margin-bottom: var(--space-sm); }
+        .topic-card p { font-size: 14px; color: var(--body-mid); margin-bottom: var(--space-md); }
+        .topic-card .viz-hint {
+            display: flex; align-items: center; gap: var(--space-sm);
+            font-size: 12px; color: var(--mute); margin-top: var(--space-md);
+            padding-top: var(--space-md); border-top: 1px solid var(--hairline);
+        }
+        .topic-card .viz-hint i { font-style: normal; }
+
+        /* ---------- 3D CANVAS ---------- */
+        #canvas-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            z-index: -1; opacity: 0.08; pointer-events: none;
+        }
+
+        /* ---------- TIMELINE ---------- */
+        .timeline { position: relative; padding-left: var(--space-3xl); }
+        .timeline::before {
+            content: ''; position: absolute; left: 12px; top: 0; bottom: 0;
+            width: 2px; background: linear-gradient(to bottom, var(--accent-purple), var(--accent-blue), var(--accent-green));
+        }
+        .timeline-item { position: relative; margin-bottom: var(--space-2xl); }
+        .timeline-item::before {
+            content: ''; position: absolute; left: calc(-1 * var(--space-3xl) + 5px);
+            top: 6px; width: 16px; height: 16px;
+            border-radius: 50%; background: var(--accent-purple); border: 3px solid var(--canvas);
+        }
+        .timeline-item h4 { font-size: 16px; }
+        .timeline-item p { font-size: 14px; color: var(--body-mid); }
+
+        /* ---------- ARCHITECTURE DIAGRAM (CSS) ---------- */
+        .arch-diagram {
+            display: flex; flex-direction: column; align-items: center; gap: var(--space-sm);
+            padding: var(--space-2xl); background: #fafafa; border-radius: var(--rounded-md);
+            border: 1px solid var(--hairline); margin: var(--space-lg) 0;
+        }
+        .arch-block {
+            padding: var(--space-md) var(--space-lg); border-radius: var(--rounded-sm);
+            font-size: 13px; font-weight: 500; text-align: center; min-width: 100px;
+            border: 1px solid; transition: transform 0.3s ease;
+        }
+        .arch-block:hover { transform: scale(1.05); }
+        .arch-connector { width: 2px; height: 16px; background: var(--hairline); }
+
+        /* ---------- GANTT CHART (CSS) ---------- */
+        .gantt { display: flex; flex-direction: column; gap: 4px; margin: var(--space-lg) 0; }
+        .gantt-row { display: flex; align-items: center; gap: var(--space-sm); }
+        .gantt-label { width: 40px; font-size: 12px; font-weight: 600; color: var(--body-mid); }
+        .gantt-bar { height: 24px; border-radius: 3px; transition: width 1s ease; }
+        .gantt-time { font-size: 11px; color: var(--mute); margin-left: var(--space-sm); }
+
+        /* ---------- PROTOCOL COMPARE ---------- */
+        .proto-table { width: 100%; border-collapse: collapse; margin: var(--space-lg) 0; font-size: 14px; }
+        .proto-table th { background: var(--primary); color: #fff; padding: var(--space-sm) var(--space-md); text-align: left; font-weight: 500; }
+        .proto-table td { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--hairline); }
+        .proto-table tr:hover { background: #f8f5ff; }
+
+        /* ---------- QUIZ ---------- */
+        .quiz-box {
+            background: #fafafa; border: 1px solid var(--hairline);
+            border-radius: var(--rounded-md); padding: var(--space-2xl);
+            margin: var(--space-lg) 0;
+        }
+        .quiz-box h4 { margin-bottom: var(--space-md); }
+        .quiz-option {
+            display: block; width: 100%; padding: var(--space-md) var(--space-lg);
+            margin-bottom: var(--space-sm); text-align: left;
+            background: var(--canvas); border: 1px solid var(--hairline);
+            border-radius: var(--rounded-sm); cursor: pointer;
+            font-size: 14px; transition: all 0.2s;
+        }
+        .quiz-option:hover { border-color: var(--accent-purple); background: #f8f5ff; }
+        .quiz-option.correct { border-color: var(--accent-green); background: #e6ffe6; }
+        .quiz-option.wrong { border-color: var(--accent-red); background: #ffe6e6; }
+        .quiz-feedback { margin-top: var(--space-sm); font-size: 14px; padding: var(--space-sm) var(--space-md); border-radius: var(--rounded-sm); }
+
+        /* ---------- 3D MODAL ---------- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(4px);
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--canvas); border-radius: var(--rounded-md);
+            padding: var(--space-3xl); max-width: 800px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+        }
+        .modal-content h2 { margin-bottom: var(--space-lg); }
+        .modal-close {
+            float: right; background: none; border: none; font-size: 24px;
+            cursor: pointer; color: var(--body-mid); line-height: 1;
+        }
+        .modal-close:hover { color: var(--ink); }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .topic-grid { grid-template-columns: 1fr; }
+            .hero-band { padding: 100px var(--space-lg) 60px; }
+            .section { padding: var(--space-2xl); }
+            .modal-content { width: 95%; padding: var(--space-2xl); }
+            .proto-table { font-size: 12px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+
+        /* ---------- FLOATING PARTICLES ---------- */
+        .particle-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden; }
+        .particle-bg span { position: absolute; display: block; width: 20px; height: 20px; background: var(--accent-purple); border-radius: 50%; opacity: 0.05; animation: float 20s infinite; }
+        .particle-bg span:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle-bg span:nth-child(2) { left: 30%; width: 40px; height: 40px; animation-delay: 3s; background: var(--accent-blue); }
+        .particle-bg span:nth-child(3) { left: 50%; animation-delay: 6s; background: var(--accent-pink); }
+        .particle-bg span:nth-child(4) { left: 70%; width: 30px; height: 30px; animation-delay: 9s; background: var(--accent-green); }
+        .particle-bg span:nth-child(5) { left: 90%; animation-delay: 12s; background: var(--accent-orange); }
+        @keyframes float { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.05; } 90% { opacity: 0.05; } 100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; } }
+
+        /* ---------- EMOJI VISUAL ---------- */
+        .big-icon { font-size: 48px; text-align: center; margin-bottom: var(--space-md); }
+        .concept-flow { display: flex; align-items: center; justify-content: center; gap: var(--space-sm); flex-wrap: wrap; margin: var(--space-lg) 0; }
+        .concept-flow .node { padding: var(--space-sm) var(--space-md); background: var(--primary); color: #fff; border-radius: var(--rounded-sm); font-size: 13px; font-weight: 500; }
+        .concept-flow .arrow { color: var(--accent-purple); font-size: 18px; }
+
+        /* ---------- PROGRESS ---------- */
+        .progress-bar-wrap { position: fixed; top: 60px; left: 0; width: 100%; height: 3px; z-index: 999; background: var(--hairline); }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue), var(--accent-green)); width: 0%; transition: width 0.1s linear; }
+
+        /* ---------- SLOW LEARNER HELPER ---------- */
+        .tip-box {
+            background: linear-gradient(135deg, #f8f5ff, #f0f0ff);
+            border-left: 3px solid var(--accent-purple);
+            padding: var(--space-lg); border-radius: 0 var(--rounded-sm) var(--rounded-sm) 0;
+            margin: var(--space-lg) 0; font-size: 14px;
+        }
+        .tip-box strong { color: var(--accent-purple); }
+        .tip-box .emoji { font-size: 24px; display: block; margin-bottom: var(--space-sm); }
+    </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
+
+<!-- Particle Background -->
+<div class="particle-bg">
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<!-- Nav -->
+<nav class="nav-bar">
+    <a href="#" class="logo">CS<span>3691</span></a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="#unit1" class="active">Unit I</a></li>
+        <li><a href="#unit2">Unit II</a></li>
+        <li><a href="#unit3">Unit III</a></li>
+        <li><a href="#unit4">Unit IV</a></li>
+        <li><a href="#unit5">Unit V</a></li>
+    </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero-band">
+    <div class="eyebrow">📚 Tomorrow's Exam · Last-Minute Study</div>
+    <h1 class="display-xxl">Embedded Systems & IoT</h1>
+    <p>CS3691 — Complete 5-unit crash course with 3D visualizations, animated diagrams, and slow-learner friendly explanations. Built for quick revision before your exam.</p>
+    <div class="hero-actions">
+        <a href="#unit1" class="btn btn-primary">🚀 Start Learning</a>
+        <a href="#quiz-section" class="btn btn-outline">🎯 Quick Quiz</a>
+    </div>
+</section>
+
+<!-- ============================================================
+     UNIT I: 8-BIT EMBEDDED PROCESSOR
+     ============================================================ -->
+<section class="section" id="unit1">
+    <div class="section-header">
+        <div class="eyebrow">Unit I</div>
+        <h2 class="display-lg">8-Bit Embedded Processor</h2>
+        <p>8051 Microcontroller — Architecture, Instruction Set, Timers, Interrupts</p>
+    </div>
+
+    <div class="topic-grid">
+        <!-- 8051 Architecture -->
+        <div class="topic-card" onclick="openModal('modal-arch')">
+            <span class="badge badge-purple">🏗️ Architecture</span>
+            <h3>8051 Microcontroller Architecture</h3>
+            <p>8-bit processor with Harvard architecture — separate program/data memory, 4KB ROM, 128B RAM, 4 I/O ports, 2 timers.</p>
+            <div class="viz-hint">🎮 Click to see 3D block diagram →</div>
+        </div>
+
+        <!-- Instruction Set -->
+        <div class="topic-card" onclick="openModal('modal-inst')">
+            <span class="badge badge-pink">💻 Instruction Set</span>
+            <h3>8051 Programming & Instruction Set</h3>
+            <p>Assembly language with MOV, ADD, JMP opcodes. 5 addressing modes: immediate, register, direct, indirect, indexed.</p>
+            <div class="viz-hint">📝 Click for live code examples →</div>
+        </div>
+
+        <!-- Timers -->
+        <div class="topic-card" onclick="openModal('modal-timer')">
+            <span class="badge badge-blue">⏱️ Timers</span>
+            <h3>Timers & Serial Port</h3>
+            <p>Two 16-bit timers (Timer 0 & 1) for delay generation, baud rate control, and event counting.</p>
+            <div class="viz-hint">⏰ Click to see timer animation →</div>
+        </div>
+
+        <!-- Interrupts -->
+        <div class="topic-card" onclick="openModal('modal-int')">
+            <span class="badge badge-orange">⚡ Interrupts</span>
+            <h3>Interrupt Handling</h3>
+            <p>5 interrupt sources (Reset, INT0, INT1, Timer 0, Timer 1). Priority-based with vector addresses.</p>
+            <div class="viz-hint">🔌 Click for interrupt flow →</div>
+        </div>
+    </div>
+
+    <!-- Architecture 3D Diagram -->
+    <div class="arch-diagram">
+        <h4 style="margin-bottom:var(--space-md); font-size:15px;">🎯 8051 Architecture — Block Diagram</h4>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
+            <div class="arch-block" style="background:#7a3dff;color:#fff;border-color:#7a3dff;">CPU (ALU + Control)</div>
+            <div class="arch-block" style="background:#3b89ff;color:#fff;border-color:#3b89ff;">4KB ROM (Program)</div>
+            <div class="arch-block" style="background:#00d722;color:#000;border-color:#00d722;">128B RAM (Data)</div>
+            <div class="arch-block" style="background:#ed52cb;color:#fff;border-color:#ed52cb;">4 × 8-bit I/O Ports</div>
+            <div class="arch-block" style="background:#ff6b00;color:#fff;border-color:#ff6b00;">2 × 16-bit Timers</div>
+            <div class="arch-block" style="background:#080808;color:#fff;border-color:#080808;">Serial Port (UART)</div>
+            <div class="arch-block" style="background:#ffae13;color:#000;border-color:#ffae13;">Interrupt Controller</div>
+            <div class="arch-block" style="background:#ee1d36;color:#fff;border-color:#ee1d36;">16-bit Address Bus</div>
+        </div>
+        <div class="tip-box" style="margin-bottom:0;">
+            <span class="emoji">💡</span>
+            <strong>Slow Learner Tip:</strong> 8051 is like a <strong>tiny computer</strong> with everything in one chip. CPU = brain, ROM = permanent memory (program), RAM = temporary workspace (data), Ports = hands (input/output), Timers = alarm clocks, Interrupts = doorbells.
+        </div>
+    </div>
+
+    <!-- Pin Diagram Visual -->
+    <div class="topic-grid" style="margin-top:var(--space-2xl);">
+        <div class="topic-card">
+            <span class="badge badge-purple">📌 Pin Diagram</span>
+            <h3>8051 Pin Configuration (40-pin DIP)</h3>
+            <p style="font-size:13px;">VCC (40) & GND (20) — Power. Port 1 (1-8) — General I/O. Port 3 (10-17) — I/O + Special functions (RXD, TXD, INT0, INT1). XTAL1/2 (18-19) — Crystal oscillator. RST (9) — Reset. PSEN (29), ALE (30), EA (31) — Control signals.</p>
+            <div class="concept-flow">
+                <span class="node">VCC</span><span class="arrow">↓</span>
+                <span class="node">CPU</span><span class="arrow">↔</span>
+                <span class="node">ROM</span><span class="arrow">↔</span>
+                <span class="node">RAM</span><span class="arrow">↔</span>
+                <span class="node">I/O</span><span class="arrow">↓</span>
+                <span class="node">GND</span>
+            </div>
+        </div>
+        <div class="topic-card">
+            <span class="badge badge-pink">🧮 Key Specs</span>
+            <h3>8051 Characteristics</h3>
+            <p style="font-size:13px;">8-bit CPU · 4KB ROM · 128B RAM · 32 I/O lines · 2 × 16-bit timers · 6 interrupts · 8-bit data bus · 16-bit address bus · 64KB external memory · Bit-addressable · 4-30 MHz clock</p>
+            <div class="viz-hint">"An 8-bit processor means it processes 8 bits of data at a time — like an 8-lane highway for data"</div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     UNIT II: EMBEDDED C PROGRAMMING
+     ============================================================ -->
+<section class="section" id="unit2">
+    <div class="section-header">
+        <div class="eyebrow">Unit II</div>
+        <h2 class="display-lg">Embedded C Programming</h2>
+        <p>Memory Interfacing · RTOS · Context Switching · Priority Scheduling</p>
+    </div>
+
+    <div class="topic-grid">
+        <div class="topic-card" onclick="openModal('modal-memory')">
+            <span class="badge badge-blue">🧠 Memory Interface</span>
+            <h3>Memory & I/O Device Interfacing</h3>
+            <p>How 8051 connects to external ROM/RAM. Address decoding, control signals (PSEN, RD, WR), data bus multiplexing.</p>
+            <div class="viz-hint">🔗 Click for memory map diagram →</div>
+        </div>
+        <div class="topic-card" onclick="openModal('modal-c')">
+            <span class="badge badge-green">⌨️ Embedded C</span>
+            <h3>Programming Embedded Systems in C</h3>
+            <p>C for embedded: volatile keyword, bit manipulation, register access, delay loops, port I/O using sbit/sfr.</p>
+            <div class="viz-hint">📟 Click for code examples →</div>
+        </div>
+        <div class="topic-card" onclick="openModal('modal-rtos')">
+            <span class="badge badge-orange">🔄 RTOS Basics</span>
+            <h3>Need for RTOS</h3>
+            <p>Real-Time OS handles multiple tasks with timing constraints. Key features: task scheduling, deterministic behavior, low latency.</p>
+            <div class="viz-hint">⏱️ Click to see RTOS diagram →</div>
+        </div>
+        <div class="topic-card" onclick="openModal('modal-context')">
+            <span class="badge badge-pink">🔄 Context Switch</span>
+            <h3>Context Switching</h3>
+            <p>Saving and restoring task state (PCB). Triggered by interrupts, multitasking, or kernel/user mode switches.</p>
+            <div class="viz-hint">🔄 Click for animation →</div>
+        </div>
+        <div class="topic-card" onclick="openModal('modal-sched')">
+            <span class="badge badge-purple">📊 Scheduling</span>
+            <h3>Priority Based Scheduling</h3>
+            <p>Preemptive (higher priority interrupts lower) and Non-Preemptive (task runs to completion). Lower number = higher priority.</p>
+            <div class="viz-hint">📈 Click for Gantt chart →</div>
+        </div>
+    </div>
+
+    <!-- RTOS vs Bare Metal -->
+    <div class="arch-diagram" style="margin-top:var(--space-lg);">
+        <h4 style="margin-bottom:var(--space-md);">🔄 Bare Metal vs RTOS</h4>
+        <div style="display:flex; gap:var(--space-2xl); flex-wrap:wrap; justify-content:center;">
+            <div style="flex:1;min-width:200px;padding:var(--space-lg);background:#fafafa;border-radius:var(--rounded-md);border:1px solid var(--hairline);">
+                <div class="big-icon">🪨</div>
+                <h4 style="text-align:center;">Bare Metal</h4>
+                <p style="font-size:13px;">Single infinite loop. No OS. One task at a time. Simple but can't handle multiple things simultaneously.</p>
+            </div>
+            <div style="flex:1;min-width:200px;padding:var(--space-lg);background:#f8f5ff;border-radius:var(--rounded-md);border:1px solid var(--accent-purple);">
+                <div class="big-icon">⚡</div>
+                <h4 style="text-align:center;">RTOS</h4>
+                <p style="font-size:13px;">Multiple tasks. Scheduler decides which runs. Context switching enables "multitasking" on single CPU. Essential for time-critical IoT.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Switching Visual -->
+    <div class="arch-diagram">
+        <h4>🔄 Context Switching Flow</h4>
+        <div class="concept-flow">
+            <span class="node" style="background:#7a3dff;">Task A Running</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#ff6b00;">Interrupt!</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#3b89ff;">Save A's State (PCB)</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#00d722;">Load Task B's State</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#ed52cb;">Task B Running</span>
+        </div>
+        <div class="tip-box" style="margin-bottom:0;">
+            💡 "Context switching is like bookmarking a page in a book, then switching to another book. When you come back, you resume from your bookmark."
+        </div>
+    </div>
+
+    <!-- Scheduling Gantt -->
+    <div class="arch-diagram">
+        <h4>📊 Priority Scheduling Example</h4>
+        <p style="font-size:13px;color:var(--body-mid);margin-bottom:var(--space-md);">Processes: P1(Pri:1,Burst:4), P2(Pri:2,Burst:3), P3(Pri:1,Burst:7), P4(Pri:3,Burst:4), P5(Pri:2,Burst:2)</p>
+        <div class="gantt" id="ganttChart">
+            <div class="gantt-row"><span class="gantt-label">P1</span><div class="gantt-bar" style="width:80px;background:#7a3dff;animation:growWidth 2s ease;"></div><span class="gantt-time">0-4ms</span></div>
+            <div class="gantt-row"><span class="gantt-label">P2</span><div class="gantt-bar" style="width:20px;background:#ed52cb;animation:growWidth 2s ease 0.5s;"></div><span class="gantt-time">4-5ms</span></div>
+            <div class="gantt-row"><span class="gantt-label">P3</span><div class="gantt-bar" style="width:140px;background:#3b89ff;animation:growWidth 2s ease 1s;"></div><span class="gantt-time">5-12ms</span></div>
+            <div class="gantt-row"><span class="gantt-label">P2</span><div class="gantt-bar" style="width:40px;background:#ed52cb;animation:growWidth 2s ease 1.5s;"></div><span class="gantt-time">12-14ms</span></div>
+            <div class="gantt-row"><span class="gantt-label">P5</span><div class="gantt-bar" style="width:40px;background:#00d722;animation:growWidth 2s ease 2s;"></div><span class="gantt-time">14-16ms</span></div>
+            <div class="gantt-row"><span class="gantt-label">P4</span><div class="gantt-bar" style="width:80px;background:#ff6b00;animation:growWidth 2s ease 2.5s;"></div><span class="gantt-time">16-20ms</span></div>
+        </div>
+        <p style="font-size:12px;color:var(--mute);margin-top:var(--space-sm);">Note: P1 starts, P3 preempts P2 (higher priority), then P5 runs, finally P4.</p>
+    </div>
+</section>
+
+<!-- ============================================================
+     UNIT III: IOT AND ARDUINO PROGRAMMING
+     ============================================================ -->
+<section class="section" id="unit3">
+    <div class="section-header">
+        <div class="eyebrow">Unit III</div>
+        <h2 class="display-lg">IoT & Arduino Programming</h2>
+        <p>IoT Concepts · Arduino · Sensors & Actuators Integration</p>
+    </div>
+
+    <div class="topic-grid">
+        <div class="topic-card" onclick="openModal('modal-iot')">
+            <span class="badge badge-blue">🌐 IoT Basics</span>
+            <h3>What is IoT?</h3>
+            <p>Internet of Things = connecting everyday objects to the internet. Sensors collect data, actuators perform actions, cloud processes everything.</p>
+            <div class="viz-hint">📡 Click for IoT architecture →</div>
+        </div>
+        <div class="topic-card" onclick="openModal('modal-arduino')">
+            <span class="badge badge-green">🤖 Arduino</span>
+            <h3>Arduino Programming</h3>
+            <p>Open-source electronics platform. ATmega328P based. Arduino IDE, sketches (setup + loop), digital/analog I/O, shields for expansion.</p>
+            <div class="viz-hint">🔧 Click for Arduino guide →</div>
+        </div>
+        <div class="topic-card">
+            <span class="badge badge-orange">📡 IoT vs Computer</span>
+            <h3>IoT Devices vs Computers</h3>
+            <p>IoT: low power, specific task, sensor-based, real-time. Computers: general purpose, high power, user-interactive, multi-application.</p>
+        </div>
+        <div class="topic-card">
+            <span class="badge badge-pink">🔌 Sensors & Actuators</span>
+            <h3>Integration with Arduino</h3>
+            <p>Sensors (temp, humidity, light, motion) → Arduino reads data → Actuators (motors, LEDs, relays) respond.</p>
+        </div>
+    </div>
+
+    <!-- IoT Architecture -->
+    <div class="arch-diagram">
+        <h4>🏗️ 4-Layer IoT Architecture</h4>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; width:100%;">
+            <div class="arch-block" style="background:#080808;color:#fff;border-color:#080808;width:80%;">Application Layer (Smart Home, Healthcare, Agriculture)</div>
+            <div class="arch-connector"></div>
+            <div class="arch-block" style="background:#7a3dff;color:#fff;border-color:#7a3dff;width:80%;">Cloud / Management Service Layer (Data Processing, Analytics)</div>
+            <div class="arch-connector"></div>
+            <div class="arch-block" style="background:#3b89ff;color:#fff;border-color:#3b89ff;width:80%;">Gateways & Networks (WiFi, Bluetooth, ZigBee, GSM)</div>
+            <div class="arch-connector"></div>
+            <div class="arch-block" style="background:#00d722;color:#000;border-color:#00d722;width:80%;">Sensors / Actuators (Temperature, Motion, Motors, LEDs)</div>
+        </div>
+        <div class="tip-box" style="margin-bottom:0;">
+            💡 <strong>How IoT works:</strong> Sensors detect environment → Data travels through network → Cloud analyzes → Application shows result / triggers action.
+        </div>
+    </div>
+
+    <!-- Arduino Quick Guide -->
+    <div class="arch-diagram">
+        <h4>🤖 Arduino UNO — Pinout & Quick Start</h4>
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm); justify-content:center;">
+            <div class="arch-block" style="background:#3b89ff;color:#fff;border-color:#3b89ff;font-size:12px;min-width:80px;">Digital I/O (0-13)</div>
+            <div class="arch-block" style="background:#00d722;color:#000;border-color:#00d722;font-size:12px;min-width:80px;">Analog In (A0-A5)</div>
+            <div class="arch-block" style="background:#ff6b00;color:#fff;border-color:#ff6b00;font-size:12px;min-width:80px;">PWM (~3,5,6,9,10,11)</div>
+            <div class="arch-block" style="background:#ed52cb;color:#fff;border-color:#ed52cb;font-size:12px;min-width:80px;">Power (5V, 3.3V, GND)</div>
+            <div class="arch-block" style="background:#7a3dff;color:#fff;border-color:#7a3dff;font-size:12px;min-width:80px;">Serial (TX/RX 0,1)</div>
+        </div>
+        <pre style="background:#1a1a1a;color:#fff;padding:var(--space-lg);border-radius:var(--rounded-sm);font-size:13px;text-align:left;width:100%;margin-top:var(--space-md);"><code>void setup() {
+  pinMode(13, OUTPUT);  // Set pin 13 as output
+  Serial.begin(9600);   // Start serial communication
+}
+void loop() {
+  digitalWrite(13, HIGH);  // LED ON
+  delay(1000);             // Wait 1 second
+  digitalWrite(13, LOW);   // LED OFF
+  delay(1000);             // Wait 1 second
+}</code></pre>
+    </div>
+</section>
+
+<!-- ============================================================
+     UNIT IV: IOT COMMUNICATION & OPEN PLATFORMS
+     ============================================================ -->
+<section class="section" id="unit4">
+    <div class="section-header">
+        <div class="eyebrow">Unit IV</div>
+        <h2 class="display-lg">IoT Communication & Open Platforms</h2>
+        <p>Protocols · Bluetooth, WiFi, ZigBee, GPS, GSM · Raspberry Pi</p>
+    </div>
+
+    <!-- Protocol Comparison Table -->
+    <h3 style="margin-bottom:var(--space-md);">📡 IoT Communication Protocols</h3>
+    <table class="proto-table">
+        <thead>
+            <tr><th>Protocol</th><th>Range</th><th>Speed</th><th>Power</th><th>Use Case</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Bluetooth</strong> 🎧</td><td>~10m</td><td>1-3 Mbps</td><td>Low</td><td>Short-range device pairing</td></tr>
+            <tr><td><strong>WiFi</strong> 📶</td><td>~100m</td><td>54-600 Mbps</td><td>High</td><td>Home/building internet</td></tr>
+            <tr><td><strong>ZigBee</strong> 🏠</td><td>~100m (mesh)</td><td>250 Kbps</td><td>Very Low</td><td>Smart home sensor networks</td></tr>
+            <tr><td><strong>GPS</strong> 🛰️</td><td>Global</td><td>—</td><td>Medium</td><td>Location tracking</td></tr>
+            <tr><td><strong>GSM</strong> 📱</td><td>Cellular</td><td>14.4 Kbps (2G)</td><td>High</td><td>SMS, voice, basic data</td></tr>
+        </tbody>
+    </table>
+
+    <!-- IoT Communication Models -->
+    <div class="arch-diagram">
+        <h4>📨 IoT Communication Models</h4>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:var(--space-md); width:100%;">
+            <div style="padding:var(--space-lg);background:#f8f5ff;border-radius:var(--rounded-sm);">
+                <div style="font-size:14px;font-weight:600;color:#7a3dff;">Request-Response</div>
+                <p style="font-size:12px;color:var(--body-mid);">Client sends request → Server responds. HTTP/REST.</p>
+            </div>
+            <div style="padding:var(--space-lg);background:#f0f8ff;border-radius:var(--rounded-sm);">
+                <div style="font-size:14px;font-weight:600;color:#3b89ff;">Publish-Subscribe</div>
+                <p style="font-size:12px;color:var(--body-mid);">Devices publish to topics. Subscribers get updates. MQTT.</p>
+            </div>
+            <div style="padding:var(--space-lg);background:#f0fff0;border-radius:var(--rounded-sm);">
+                <div style="font-size:14px;font-weight:600;color:#00d722;">Push-Pull</div>
+                <p style="font-size:12px;color:var(--body-mid);">Data producers push to queue. Consumers pull. Message queues.</p>
+            </div>
+            <div style="padding:var(--space-lg);background:#fff8f0;border-radius:var(--rounded-sm);">
+                <div style="font-size:14px;font-weight:600;color:#ff6b00;">Exclusive Pair</div>
+                <p style="font-size:12px;color:var(--body-mid);">Direct persistent connection between two devices.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="topic-grid" style="margin-top:var(--space-lg);">
+        <div class="topic-card">
+            <span class="badge badge-green">🍓 Raspberry Pi</span>
+            <h3>Open Platform: Raspberry Pi</h3>
+            <p style="font-size:13px;">Single-board computer with ARM processor, GPIO pins, HDMI, USB. Full Linux OS. Can run Python, Node.js. Ideal for IoT gateways.</p>
+            <div class="concept-flow">
+                <span class="node" style="background:#00d722;">GPIO</span><span class="arrow">↔</span>
+                <span class="node" style="background:#3b89ff;">CPU</span><span class="arrow">↔</span>
+                <span class="node" style="background:#7a3dff;">Cloud</span>
+            </div>
+        </div>
+        <div class="topic-card">
+            <span class="badge badge-blue">☁️ Cloud Connectivity</span>
+            <h3>Connecting to the Cloud</h3>
+            <p style="font-size:13px;">IoT devices send data to cloud platforms (AWS IoT, Firebase, ThingSpeak) via HTTP/MQTT. Cloud stores, analyzes, and visualizes data.</p>
+            <div class="viz-hint">Device → Gateway → Internet → Cloud → App</div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     UNIT V: APPLICATIONS DEVELOPMENT
+     ============================================================ -->
+<section class="section" id="unit5">
+    <div class="section-header">
+        <div class="eyebrow">Unit V</div>
+        <h2 class="display-lg">Applications Development</h2>
+        <p>Home Automation · Smart Agriculture · Smart Cities · Smart Healthcare</p>
+    </div>
+
+    <div class="topic-grid">
+        <div class="topic-card">
+            <span class="badge badge-orange">🏠 Home Automation</span>
+            <h3>Smart Home</h3>
+            <p>IoT controls lighting, HVAC, security, appliances. Sensors (motion, temp, door) + Actuators (relays, motors) + Cloud control via smartphone.</p>
+            <div class="concept-flow">
+                <span class="node">Sensor</span><span class="arrow">→</span>
+                <span class="node" style="background:#7a3dff;">Arduino</span><span class="arrow">→</span>
+                <span class="node" style="background:#3b89ff;">WiFi</span><span class="arrow">→</span>
+                <span class="node" style="background:#00d722;">Phone App</span>
+            </div>
+        </div>
+        <div class="topic-card">
+            <span class="badge badge-green">🌾 Smart Agriculture</span>
+            <h3>Smart Farming</h3>
+            <p>Soil moisture sensors → automatic irrigation. Temperature/humidity monitoring. Drone-based crop analysis. Livestock tracking with GPS.</p>
+        </div>
+        <div class="topic-card">
+            <span class="badge badge-blue">🏙️ Smart Cities</span>
+            <h3>Urban IoT</h3>
+            <p>Smart traffic lights, waste management, air quality monitoring, smart parking, street lighting automation.</p>
+        </div>
+        <div class="topic-card">
+            <span class="badge badge-pink">🏥 Smart Healthcare</span>
+            <h3>Health IoT</h3>
+            <p>Wearable health monitors (heart rate, BP, glucose). Remote patient monitoring. Smart pills. Emergency alert systems.</p>
+        </div>
+    </div>
+
+    <!-- Complete Embedded System Design Flow -->
+    <div class="arch-diagram">
+        <h4>🔧 Complete Embedded System Design Flow</h4>
+        <div class="concept-flow">
+            <span class="node" style="background:#7a3dff;">Problem Definition</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#3b89ff;">Hardware Design</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#00d722;">Software Dev</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#ff6b00;">Integration</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#ed52cb;">Testing</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#080808;">Deployment</span>
+        </div>
+    </div>
+
+    <!-- Application Examples Timeline -->
+    <div class="timeline" style="margin-top:var(--space-2xl);">
+        <h4 style="margin-bottom:var(--space-lg);">📋 Real-World IoT Application Examples</h4>
+        <div class="timeline-item">
+            <h4>🏠 Smart Home — Google Nest / Alexa</h4>
+            <p>Voice-controlled thermostat, lights, locks. Uses WiFi + cloud AI.</p>
+        </div>
+        <div class="timeline-item">
+            <h4>🌾 Smart Agriculture — Soil Monitoring</h4>
+            <p>ESP32 + soil moisture sensor + pump relay. Auto-watering based on moisture level.</p>
+        </div>
+        <div class="timeline-item">
+            <h4>🏙️ Smart City — Smart Parking</h4>
+            <p>Ultrasonic sensors detect car presence → Cloud shows available spots → App navigation.</p>
+        </div>
+        <div class="timeline-item">
+            <h4>🏥 Smart Healthcare — Wearable ECG</h4>
+            <p>AD8232 ECG sensor + ESP32 → Sends heart data to cloud → Doctor monitors remotely.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     QUIZ SECTION
+     ============================================================ -->
+<section class="section" id="quiz-section">
+    <div class="section-header">
+        <div class="eyebrow">🎯 Quick Quiz</div>
+        <h2 class="display-lg">Test Your Understanding</h2>
+        <p>10 questions covering all 5 units. Click an answer to see if you're right.</p>
+    </div>
+
+    <div id="quizContainer"></div>
+    <div style="text-align:center;margin-top:var(--space-2xl);" id="quizResult"></div>
+</section>
+
+<!-- Footer -->
+<section style="padding:var(--space-3xl);text-align:center;border-top:1px solid var(--hairline);">
+    <p style="color:var(--body-mid);font-size:14px;">CS3691 — Embedded Systems & IoT · Study Guide for Slow Learners · Built with ❤️ for your exam</p>
+    <p style="color:var(--mute);font-size:12px;margin-top:var(--space-sm);">Source: Lecture Notes (322 pages) · All 5 units covered</p>
+</section>
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- Modal: Architecture -->
+<div class="modal-overlay" id="modal-arch">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-arch')">&times;</button>
+        <h2>🏗️ 8051 Architecture — Deep Dive</h2>
+        <div id="threejs-arch" style="width:100%;height:300px;border-radius:var(--rounded-sm);margin-bottom:var(--space-lg);background:#fafafa;"></div>
+        <div class="tip-box">
+            💡 <strong>Think of 8051 as a factory:</strong><br/>
+            CPU = Factory Manager (makes decisions)<br/>
+            ROM = Blueprint Cabinet (permanent plans)<br/>
+            RAM = Workbench (temporary workspace)<br/>
+            I/O Ports = Loading Docks (talk to outside)<br/>
+            Timers = Alarm Clocks (measure time)<br/>
+            Interrupts = Doorbells (urgent messages)
+        </div>
+        <h4 style="margin-bottom:var(--space-sm);">What is Harvard Architecture?</h4>
+        <p style="font-size:14px;">8051 uses Harvard architecture — separate memory for program (ROM) and data (RAM) with separate buses. This means it can read an instruction AND access data at the <strong>same time</strong>, making it faster than Von Neumann architecture.</p>
+        <h4 style="margin:var(--space-lg) 0 var(--space-sm);">Why 8051 is still popular?</h4>
+        <ul style="font-size:14px;padding-left:var(--space-xl);">
+            <li>Simple & easy to learn — perfect for beginners</li>
+            <li>Widely available and cheap</li>
+            <li>Huge community support and resources</li>
+            <li>Bit-addressable — can work with individual bits</li>
+            <li>Used in millions of products (toys, appliances, automotive)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Modal: Instructions -->
+<div class="modal-overlay" id="modal-inst">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-inst')">&times;</button>
+        <h2>💻 8051 Instruction Set & Programming</h2>
+        <pre style="background:#1a1a1a;color:#fff;padding:var(--space-lg);border-radius:var(--rounded-sm);font-size:13px;overflow-x:auto;"><code>; 8051 Assembly — Add two numbers
+ORG 0000H       ; Start at address 0
+MOV A, #25H     ; Load 25 into accumulator
+MOV R1, #14H    ; Load 14 into register R1
+ADD A, R1       ; Add R1 to A (A = 39H)
+MOV P1, A       ; Send result to Port 1
+END             ; End of program</code></pre>
+        <h4 style="margin:var(--space-lg) 0 var(--space-sm);">5 Addressing Modes</h4>
+        <table class="proto-table">
+            <thead><tr><th>Mode</th><th>Example</th><th>Meaning</th></tr></thead>
+            <tbody>
+                <tr><td>Immediate</td><td>MOV A, #25H</td><td>Load value directly</td></tr>
+                <tr><td>Register</td><td>ADD A, R1</td><td>Use register value</td></tr>
+                <tr><td>Direct</td><td>MOV A, 40H</td><td>Use RAM address</td></tr>
+                <tr><td>Indirect</td><td>MOV A, @R0</td><td>Use address in register</td></tr>
+                <tr><td>Indexed</td><td>MOVC A, @A+DPTR</td><td>Program memory access</td></tr>
+            </tbody>
+        </table>
+        <div class="tip-box">💡 <strong>Mnemonics are shortcuts:</strong> MOV = move, ADD = add, SUBB = subtract with borrow, JMP = jump, CJNE = compare and jump if not equal, DJNZ = decrement and jump if not zero.</div>
+    </div>
+</div>
+
+<!-- Modal: Timers -->
+<div class="modal-overlay" id="modal-timer">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-timer')">&times;</button>
+        <h2>⏱️ Timers & Serial Port</h2>
+        <div class="arch-diagram">
+            <h4>Timer 0 & Timer 1 (16-bit each)</h4>
+            <div style="display:flex; gap:var(--space-lg); flex-wrap:wrap; justify-content:center;">
+                <div style="padding:var(--space-lg);background:#f8f5ff;border-radius:var(--rounded-sm);text-align:center;">
+                    <div style="font-size:28px;">⏰</div>
+                    <div style="font-weight:600;">Timer 0</div>
+                    <div style="font-size:13px;color:var(--body-mid);">TH0 + TL0</div>
+                    <div style="font-size:12px;color:var(--mute);">Modes: 0-3</div>
+                </div>
+                <div style="padding:var(--space-lg);background:#f0f8ff;border-radius:var(--rounded-sm);text-align:center;">
+                    <div style="font-size:28px;">⏰</div>
+                    <div style="font-weight:600;">Timer 1</div>
+                    <div style="font-size:13px;color:var(--body-mid);">TH1 + TL1</div>
+                    <div style="font-size:12px;color:var(--mute);">Baud rate gen</div>
+                </div>
+            </div>
+        </div>
+        <h4 style="margin-bottom:var(--space-sm);">What are Timers used for?</h4>
+        <ul style="font-size:14px;padding-left:var(--space-xl);margin-bottom:var(--space-lg);">
+            <li><strong>Delay generation</strong> — create precise time delays (e.g., blinking LED every 1 second)</li>
+            <li><strong>Baud rate control</strong> — set speed for serial communication</li>
+            <li><strong>Event counting</strong> — count external pulses (e.g., count products on conveyor belt)</li>
+            <li><strong>PWM generation</strong> — create pulse width modulated signals</li>
+        </ul>
+        <div class="tip-box">💡 "Think of timers as stopwatches. You set a value, the timer counts down/up, and when it reaches zero, it sets a flag or triggers an interrupt."</div>
+    </div>
+</div>
+
+<!-- Modal: Interrupts -->
+<div class="modal-overlay" id="modal-int">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-int')">&times;</button>
+        <h2>⚡ Interrupt Handling in 8051</h2>
+        <div class="arch-diagram">
+            <h4>5 Interrupt Sources</h4>
+            <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm); justify-content:center;">
+                <div class="arch-block" style="background:#7a3dff;color:#fff;border-color:#7a3dff;">Reset (0000H)</div>
+                <div class="arch-block" style="background:#3b89ff;color:#fff;border-color:#3b89ff;">INT0 (0003H)</div>
+                <div class="arch-block" style="background:#00d722;color:#000;border-color:#00d722;">Timer 0 (000BH)</div>
+                <div class="arch-block" style="background:#ff6b00;color:#fff;border-color:#ff6b00;">INT1 (0013H)</div>
+                <div class="arch-block" style="background:#ed52cb;color:#fff;border-color:#ed52cb;">Timer 1 (001BH)</div>
+            </div>
+        </div>
+        <div class="concept-flow" style="margin:var(--space-lg) 0;">
+            <span class="node" style="background:var(--accent-green);">Normal Program</span>
+            <span class="arrow">← interrupt! →</span>
+            <span class="node" style="background:var(--accent-purple);">ISR Runs</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:var(--accent-green);">Resume Program</span>
+        </div>
+        <div class="tip-box">💡 "An interrupt is like a doorbell. You're cooking (main program), doorbell rings (interrupt), you stop cooking, answer the door (ISR), then go back to cooking exactly where you left off."</div>
+        <h4 style="margin:var(--space-lg) 0 var(--space-sm);">Priority Levels</h4>
+        <p style="font-size:14px;">Each interrupt can be set to high or low priority using the IP (Interrupt Priority) register. If two interrupts occur simultaneously, the higher priority one runs first. Reset has the highest priority.</p>
+    </div>
+</div>
+
+<!-- Modal: Memory -->
+<div class="modal-overlay" id="modal-memory">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-memory')">&times;</button>
+        <h2>🧠 Memory & I/O Interfacing</h2>
+        <div class="arch-diagram">
+            <h4>8051 Memory Map</h4>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:4px; width:100%;">
+                <div class="arch-block" style="background:#080808;color:#fff;border-color:#080808;width:60%;">External Memory (max 64KB)</div>
+                <div class="arch-connector"></div>
+                <div class="arch-block" style="background:#7a3dff;color:#fff;border-color:#7a3dff;width:60%;">Internal ROM 4KB (0000H-0FFFH)</div>
+                <div class="arch-connector"></div>
+                <div class="arch-block" style="background:#3b89ff;color:#fff;border-color:#3b89ff;width:60%;">Internal RAM 128B (00H-7FH)</div>
+                <div class="arch-connector"></div>
+                <div class="arch-block" style="background:#00d722;color:#000;border-color:#00d722;width:60%;">SFR (80H-FFH) Special Function Regs</div>
+            </div>
+        </div>
+        <div class="tip-box">💡 "Internal memory = your desk drawer. External memory = a filing cabinet in another room. You use the drawer first. If it's full, you go to the cabinet."</div>
+    </div>
+</div>
+
+<!-- Modal: C Programming -->
+<div class="modal-overlay" id="modal-c">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-c')">&times;</button>
+        <h2>⌨️ Embedded C Programming</h2>
+        <pre style="background:#1a1a1a;color:#fff;padding:var(--space-lg);border-radius:var(--rounded-sm);font-size:13px;overflow-x:auto;"><code>// Blink LED using embedded C
+#include &lt;reg51.h&gt;   // 8051 register definitions
+
+sbit LED = P1^0;     // LED connected to pin P1.0
+
+void delay(unsigned int ms) {
+    unsigned int i, j;
+    for(i = 0; i &lt; ms; i++)
+        for(j = 0; j &lt; 127; j++);  // ~1ms delay
+}
+
+void main() {
+    while(1) {
+        LED = 1;      // Turn ON
+        delay(1000);   // Wait 1 second
+        LED = 0;      // Turn OFF
+        delay(1000);   // Wait 1 second
+    }
+}</code></pre>
+        <h4 style="margin:var(--space-lg) 0 var(--space-sm);">Key Embedded C Concepts</h4>
+        <ul style="font-size:14px;padding-left:var(--space-xl);">
+            <li><strong>volatile</strong> — tells compiler not to optimize variable (may change by hardware)</li>
+            <li><strong>sbit</strong> — access single bit of SFR (e.g., sbit LED = P1^0)</li>
+            <li><strong>sfr</strong> — declare special function register at specific address</li>
+            <li><strong>bit manipulation</strong> — use &, |, ^, ~ to set/clear/toggle individual bits</li>
+            <li><strong>delay loops</strong> — nested loops for approximate timing (not precise)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Modal: RTOS -->
+<div class="modal-overlay" id="modal-rtos">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-rtos')">&times;</button>
+        <h2>🔄 Why RTOS is Needed?</h2>
+        <div class="arch-diagram">
+            <h4>Without RTOS vs With RTOS</h4>
+            <div style="display:flex; gap:var(--space-2xl); flex-wrap:wrap; justify-content:center;">
+                <div style="flex:1;min-width:180px;">
+                    <div style="font-weight:600;color:var(--accent-red);margin-bottom:var(--space-sm);">❌ Without RTOS</div>
+                    <div class="gantt-bar" style="width:100%;height:12px;background:#ee1d36;margin-bottom:2px;"></div>
+                    <div class="gantt-bar" style="width:100%;height:12px;background:#3b89ff;margin-bottom:2px;"></div>
+                    <div class="gantt-bar" style="width:100%;height:12px;background:#00d722;"></div>
+                    <p style="font-size:12px;color:var(--body-mid);margin-top:var(--space-sm);">One long loop — tasks run sequentially. Critical tasks wait!</p>
+                </div>
+                <div style="flex:1;min-width:180px;">
+                    <div style="font-weight:600;color:var(--accent-green);margin-bottom:var(--space-sm);">✅ With RTOS</div>
+                    <div class="gantt-bar" style="width:40%;height:12px;background:#ee1d36;margin-bottom:2px;display:inline-block;"></div>
+                    <div class="gantt-bar" style="width:20%;height:12px;background:#3b89ff;margin-bottom:2px;display:inline-block;"></div>
+                    <div class="gantt-bar" style="width:30%;height:12px;background:#00d722;margin-bottom:2px;display:inline-block;"></div>
+                    <p style="font-size:12px;color:var(--body-mid);margin-top:var(--space-sm);">Tasks share CPU time. High-priority tasks run first.</p>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box">💡 "RTOS is like a restaurant manager. Without RTOS, the chef does everything alone (cook, serve, clean). With RTOS, the manager assigns tasks: chef cooks, waiter serves, cleaner cleans — all working together."</div>
+    </div>
+</div>
+
+<!-- Modal: Context Switch -->
+<div class="modal-overlay" id="modal-context">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-context')">&times;</button>
+        <h2>🔄 Context Switching — Explained Simply</h2>
+        <div class="arch-diagram" id="contextViz" style="height:200px;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+            <div id="contextAnim" style="display:flex; gap:var(--space-md); align-items:center; font-size:24px;">
+                <span style="padding:var(--space-md);background:#7a3dff;color:#fff;border-radius:var(--rounded-sm);">Task A</span>
+                <span id="contextArrow" style="color:#ff6b00;font-size:32px;">→</span>
+                <span style="padding:var(--space-md);background:#3b89ff;color:#fff;border-radius:var(--rounded-sm);">Save</span>
+                <span style="color:#ff6b00;font-size:32px;">→</span>
+                <span style="padding:var(--space-md);background:#00d722;color:#000;border-radius:var(--rounded-sm);">Task B</span>
+            </div>
+            <p style="font-size:13px;color:var(--body-mid);margin-top:var(--space-md);" id="contextLabel">Animation: Task A running → Interrupt → Save state → Task B runs</p>
+        </div>
+        <h4 style="margin:var(--space-lg) 0 var(--space-sm);">What is saved in PCB?</h4>
+        <ul style="font-size:14px;padding-left:var(--space-xl);">
+            <li>Program Counter (PC) — where to resume</li>
+            <li>CPU registers (A, B, R0-R7, DPTR, PSW)</li>
+            <li>Stack pointer</li>
+            <li>Memory allocation info</li>
+            <li>I/O status</li>
+        </ul>
+        <div class="tip-box">💡 "Context switching is like pausing a movie, switching to another channel, then coming back to the exact frame you paused."</div>
+    </div>
+</div>
+
+<!-- Modal: Scheduling -->
+<div class="modal-overlay" id="modal-sched">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-sched')">&times;</button>
+        <h2>📊 Priority Scheduling</h2>
+        <div class="arch-diagram">
+            <h4>Preemptive vs Non-Preemptive</h4>
+            <div style="display:flex; gap:var(--space-2xl); flex-wrap:wrap; justify-content:center;">
+                <div style="flex:1;min-width:180px;padding:var(--space-lg);background:#fff0f0;border-radius:var(--rounded-sm);">
+                    <div style="font-weight:600;color:var(--accent-red);">⏭️ Preemptive</div>
+                    <p style="font-size:13px;">Higher priority task can <strong>interrupt</strong> a running lower priority task. CPU saves state, runs high priority, resumes.</p>
+                </div>
+                <div style="flex:1;min-width:180px;padding:var(--space-lg);background:#f0fff0;border-radius:var(--rounded-sm);">
+                    <div style="font-weight:600;color:var(--accent-green);">⏸️ Non-Preemptive</div>
+                    <p style="font-size:13px;">Task runs until it <strong>voluntarily</strong> releases CPU (completes or blocks). No interruptions once started.</p>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box">💡 "Preemptive = your friend interrupts your conversation for an urgent call. Non-preemptive = your friend waits until you finish talking."</div>
+    </div>
+</div>
+
+<!-- Modal: IoT Basics -->
+<div class="modal-overlay" id="modal-iot">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-iot')">&times;</button>
+        <h2>🌐 Internet of Things — Explained Simply</h2>
+        <div class="concept-flow" style="margin:var(--space-lg) 0;">
+            <span class="node" style="background:#7a3dff;">Sensors</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#3b89ff;">Network</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#00d722;">Cloud</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#ff6b00;">App</span>
+            <span class="arrow">→</span>
+            <span class="node" style="background:#ed52cb;">You!</span>
+        </div>
+        <div class="tip-box">
+            💡 <strong>Real-life example:</strong> Your smart watch has a heart rate sensor (sensor). It sends data via Bluetooth (network) to your phone. Phone sends to cloud (cloud). You see your heart rate graph on the app (app).
+        </div>
+        <h4 style="margin:var(--space-lg) 0 var(--space-sm);">IoT Decision Framework</h4>
+        <table class="proto-table">
+            <thead><tr><th>Area</th><th>Question to Ask</th></tr></thead>
+            <tbody>
+                <tr><td>User Experience</td><td>Who uses it? How?</td></tr>
+                <tr><td>Data</td><td>What data? Where stored?</td></tr>
+                <tr><td>Business</td><td>How to monetize?</td></tr>
+                <tr><td>Technology</td><td>Which hardware/software?</td></tr>
+                <tr><td>Security</td><td>How to protect?</td></tr>
+                <tr><td>Standards</td><td>What regulations apply?</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal: Arduino -->
+<div class="modal-overlay" id="modal-arduino">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-arduino')">&times;</button>
+        <h2>🤖 Arduino Programming Guide</h2>
+        <div class="arch-diagram">
+            <h4>Arduino UNO Specs</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm);justify-content:center;">
+                <div class="arch-block" style="background:#3b89ff;font-size:12px;min-width:100px;">ATmega328P</div>
+                <div class="arch-block" style="background:#00d722;color:#000;font-size:12px;min-width:100px;">16 MHz Clock</div>
+                <div class="arch-block" style="background:#ff6b00;font-size:12px;min-width:100px;">32KB Flash</div>
+                <div class="arch-block" style="background:#ed52cb;font-size:12px;min-width:100px;">2KB SRAM</div>
+                <div class="arch-block" style="background:#7a3dff;font-size:12px;min-width:100px;">1KB EEPROM</div>
+            </div>
+        </div>
+        <h4 style="margin:var(--space-lg) 0 var(--space-sm);">Arduino Programming Structure</h4>
+        <pre style="background:#1a1a1a;color:#fff;padding:var(--space-lg);border-radius:var(--rounded-sm);font-size:13px;"><code>void setup() {
+  // Runs ONCE at power-on
+  // Configure pins, start serial
+  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Runs FOREVER
+  // Main program logic
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
+}</code></pre>
+        <div class="tip-box">💡 "Arduino is like a Lego set for electronics. The board is the base plate, sensors are the bricks, code is the instruction manual."</div>
+    </div>
+</div>
+
+
+<script>
+// ============================================================
+// NAVIGATION — Active link highlighting
+// ============================================================
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+        const top = section.offsetTop - 100;
+        if (window.scrollY >= top) current = section.getAttribute('id');
+    });
+    navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+    // Progress bar
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    document.getElementById('progressFill').style.width = (scrollTop / docHeight * 100) + '%';
+});
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow = ''; }
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.classList.remove('active'); document.body.style.overflow = ''; } });
+});
+// Close on Escape
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(m => { m.classList.remove('active'); document.body.style.overflow = ''; }); } });
+
+// ============================================================
+// CONTEXT SWITCHING ANIMATION
+// ============================================================
+setInterval(() => {
+    const arrow = document.getElementById('contextArrow');
+    const label = document.getElementById('contextLabel');
+    if (!arrow || !label) return;
+    const states = [
+        { arrow: '→', text: 'Task A running → Interrupt → Save state → Task B runs' },
+        { arrow: '←', text: 'Task B running → Interrupt → Save state → Task A runs' },
+    ];
+    const current = arrow.textContent === '→' ? 1 : 0;
+    arrow.textContent = states[current].arrow;
+    label.textContent = states[current].text;
+}, 2000);
+
+// ============================================================
+// QUIZ — 10 questions
+// ============================================================
+const quizData = [
+    { q: 'What architecture does the 8051 microcontroller use?', options: ['Von Neumann', 'Harvard', 'Princeton', 'Turing'], correct: 1 },
+    { q: 'How many bytes of internal RAM does the original 8051 have?', options: ['64 bytes', '128 bytes', '256 bytes', '4KB'], correct: 1 },
+    { q: 'How many I/O ports does the 8051 have?', options: ['2', '3', '4', '5'], correct: 2 },
+    { q: 'What does RTOS stand for?', options: ['Real-Time Operating System', 'Reduced Time Output System', 'Rapid Task Organization Software', 'Real Transfer Operating System'], correct: 0 },
+    { q: 'Which protocol uses publish-subscribe model?', options: ['HTTP', 'FTP', 'MQTT', 'SMTP'], correct: 2 },
+    { q: 'How many interrupt sources does 8051 have?', options: ['3', '5', '7', '8'], correct: 1 },
+    { q: 'What is the function of Arduino setup() function?', options: ['Runs forever', 'Runs once at start', 'Runs on interrupt', 'Runs on button press'], correct: 1 },
+    { q: 'Which IoT layer contains sensors and actuators?', options: ['Application', 'Cloud', 'Gateway', 'Device'], correct: 3 },
+    { q: 'In priority scheduling, which number means higher priority?', options: ['Higher number', 'Lower number', 'Both equal', 'Depends on OS'], correct: 1 },
+    { q: 'What does GPIO stand for?', options: ['General Purpose Input Output', 'Graphics Processing I/O', 'General Protocol Input Output', 'Global Purpose Interface Operation'], correct: 0 },
+];
+
+let quizAnswered = false;
+
+function renderQuiz() {
+    const container = document.getElementById('quizContainer');
+    quizData.forEach((item, idx) => {
+        const box = document.createElement('div');
+        box.className = 'quiz-box';
+        box.innerHTML = `
+            <h4>Q${idx+1}: ${item.q}</h4>
+            ${item.options.map((opt, oi) => `<button class="quiz-option" data-q="${idx}" data-opt="${oi}" onclick="checkAnswer(${idx}, ${oi})">${String.fromCharCode(65+oi)}. ${opt}</button>`).join('')}
+            <div class="quiz-feedback" id="feedback-${idx}"></div>
+        `;
+        container.appendChild(box);
+    });
+}
+
+function checkAnswer(qIdx, optIdx) {
+    const item = quizData[qIdx];
+    const feedback = document.getElementById(`feedback-${qIdx}`);
+    const buttons = document.querySelectorAll(`.quiz-option[data-q="${qIdx}"]`);
+
+    // Disable all buttons for this question
+    buttons.forEach(b => b.disabled = true);
+
+    if (optIdx === item.correct) {
+        buttons[optIdx].classList.add('correct');
+        feedback.innerHTML = '✅ Correct!';
+        feedback.style.color = '#00d722';
+    } else {
+        buttons[optIdx].classList.add('wrong');
+        buttons[item.correct].classList.add('correct');
+        feedback.innerHTML = `❌ Wrong. Correct answer: ${String.fromCharCode(65+item.correct)}`;
+        feedback.style.color = '#ee1d36';
+    }
+}
+
+renderQuiz();
+
+// ============================================================
+// 3D BACKGROUND — Floating cubes (Three.js)
+// ============================================================
+(function init3D() {
+    try {
+        const container = document.createElement('div');
+        container.id = 'canvas-container';
+        document.body.appendChild(container);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Create floating geometric shapes
+        const shapes = [];
+        const colors = [0x7a3dff, 0x3b89ff, 0x00d722, 0xff6b00, 0xed52cb, 0xffae13];
+        const geometries = [
+            new THREE.BoxGeometry(0.8, 0.8, 0.8),
+            new THREE.IcosahedronGeometry(0.5),
+            new THREE.OctahedronGeometry(0.6),
+            new THREE.TorusGeometry(0.4, 0.15, 8, 12),
+        ];
+
+        for (let i = 0; i < 30; i++) {
+            const geo = geometries[i % geometries.length];
+            const mat = new THREE.MeshBasicMaterial({
+                color: colors[i % colors.length],
+                wireframe: true,
+                transparent: true,
+                opacity: 0.15 + Math.random() * 0.15,
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(
+                (Math.random() - 0.5) * 20,
+                (Math.random() - 0.5) * 20,
+                (Math.random() - 0.5) * 20 - 5
+            );
+            mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+            mesh.userData = {
+                rotSpeed: { x: (Math.random() - 0.5) * 0.01, y: (Math.random() - 0.5) * 0.01 },
+                floatSpeed: 0.002 + Math.random() * 0.005,
+                floatPhase: Math.random() * Math.PI * 2,
+            };
+            scene.add(mesh);
+            shapes.push(mesh);
+        }
+
+        camera.position.z = 8;
+
+        let animFrame;
+        function animate() {
+            animFrame = requestAnimationFrame(animate);
+            const time = Date.now() * 0.001;
+            shapes.forEach((mesh, i) => {
+                mesh.rotation.x += mesh.userData.rotSpeed.x;
+                mesh.rotation.y += mesh.userData.rotSpeed.y;
+                mesh.position.y += Math.sin(time * mesh.userData.floatSpeed + mesh.userData.floatPhase) * 0.002;
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    } catch(e) {
+        console.log('3D skipped:', e.message);
+    }
+})();
+
+// ============================================================
+// SMOOTH SCROLL
+// ============================================================
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+});
+
+console.log('🎓 CS3691 Study Guide loaded — Good luck on your exam!');
+</script>
+</body>
+</html>
